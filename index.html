@@ -3189,7 +3189,7 @@ function renderProd(){const box=$('#prodBox'),c=S.cfg;if(!prodDesde)prodDesde=dA
     XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(agri.map(a=>({Lote:a.e.nombre||'',Cultivo:a.f.Cultivo||'',ha:+a.ha.toFixed(1),'Esperado kg':Math.round(a.esp),'Cosecha real kg':a.kg,'Costo Gs':a.cost,'Gs/kg':a.kg&&a.cost?+(a.cost/a.kg).toFixed(1):''}))),'Agricultura');
     XLSX.writeFile(wb,`Queenie_produccion_${prodDesde}_${hasta}.xlsx`)}}
 // ================= vista 3D =================
-let M3=null;const m3={metric:'cab',color:null,base:'min',spin:true,k:0,hov:null,sel:null,raf:0,pulse:0,touched:0};
+let M3=null;const m3={nav:'orbit',metric:'cab',color:null,base:'min',spin:true,k:0,hov:null,sel:null,raf:0,pulse:0,touched:0};
 const M3SEM={verde:'#3fbf7f',amarillo:'#e9c046',rojo:'#ef5a50',gris:'#5f6b66'};
 const M3MET=[['cab','Cabezas'],['kg','Kg producidos'],['carga','Carga'],['sem','Semáforo'],['ha','Superficie']];
 const M3COL=[['sem','Semáforo'],['mod','Módulos'],['past','Pastura']];
@@ -3215,6 +3215,8 @@ function m3Ui(){if(!m3.color)m3.color=UL.some(u=>potCalcCache[u.id].sem!=='gris'
   const kg=prodCalc(dAdd(todayS(),-30)).reduce((s,r)=>s+r.kg,0);const seg=(arr,cur,key)=>`<div class="seg">${arr.map(([v,t])=>`<button data-${key}="${v}" class="${cur===v?'on':''}">${t}</button>`).join('')}</div>`;
   box.innerHTML=`<div class="g3 top"><div class="t3">Estancia Queenie <span>3D</span></div>
    <div class="l3">Altura</div>${seg(M3MET,m3.metric,'mm')}<div class="l3">Color</div>${seg(M3COL,m3.color,'mc')}<div class="l3 opt3">Fondo</div><div class="opt3">${seg(M3BASE,m3.base,'mb')}</div>
+   <div class="l3">Arrastrar con el mouse / dedo</div>${seg([['orbit','🔄 Girar y inclinar'],['pan','✋ Mover']],m3.nav,'mn')}
+   <div class="sub3" style="font-size:11px;margin-top:6px">${m3.nav==='orbit'?'Arrastrá para girar en cualquier dirección · clic derecho o Shift + arrastrar para mover · rueda para acercar':'Arrastrá para mover · clic derecho o Ctrl + arrastrar para girar · rueda para acercar'}</div>
    <div class="row3"><button class="b3 ${m3.spin?'on':''}" id="m3spin">${m3.spin?'⏸ Girando':'⟳ Girar'}</button><button class="b3" id="m3home">⌂ Vista general</button><button class="b3" id="m3top">⬒ Desde arriba</button></div>
    <div class="lgw">${m3Legend()}</div></div>
    <div class="g3 kpi3"><div><b data-cnt="${tot}">0</b><span>cabezas</span></div><div><b data-cnt="${act}">0</b><span>módulos con hacienda</span></div><div><b data-cnt="${Math.round(kg)}">0</b><span>kg producidos · 30 d</span></div><div class="${crit?'r':''}"><b data-cnt="${crit}">0</b><span>módulos críticos</span></div></div>
@@ -3223,8 +3225,25 @@ function m3Ui(){if(!m3.color)m3.color=UL.some(u=>potCalcCache[u.id].sem!=='gris'
   box.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{m3.metric=b.dataset.mm;m3Regrow()});
   box.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{m3.color=b.dataset.mc;upd3d();m3Ui()});
   box.querySelectorAll('[data-mb]').forEach(b=>b.onclick=()=>{m3.base=b.dataset.mb;m3Base();m3Ui()});
+  box.querySelectorAll('[data-mn]').forEach(b=>b.onclick=()=>{m3.nav=b.dataset.mn;m3Ui()});
   $('#m3spin').onclick=()=>{m3.spin=!m3.spin;m3.touched=0;m3Ui()};$('#m3home').onclick=()=>m3Home(1800);$('#m3top').onclick=()=>M3&&M3.easeTo({pitch:0,bearing:0,duration:1400});
   if(m3.sel!=null)m3Card(m3.sel)}
+// Navegación tipo Google Earth: arrastrar = orbitar (rumbo + inclinación); derecho/Shift = mover; con inercia
+function m3Orbit(){const cv=M3.getCanvasContainer();let st=null,vel=null,last=null,inert=0;
+  cv.addEventListener('contextmenu',e=>e.preventDefault());
+  const stopInert=()=>{cancelAnimationFrame(inert);vel=null};
+  cv.addEventListener('pointerdown',e=>{if(e.pointerType==='touch'&&!e.isPrimary){st=null;return}stopInert();
+    const alt=e.button===2||e.shiftKey||e.ctrlKey||e.button===1;const mode=(m3.nav==='orbit')!==alt?'orbit':'pan';
+    st={mode,x:e.clientX,y:e.clientY,id:e.pointerId};last={x:e.clientX,y:e.clientY,t:performance.now()};vel={x:0,y:0};m3.touched=performance.now();try{cv.setPointerCapture(e.pointerId)}catch(x){}});
+  cv.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const now=performance.now(),dx=e.clientX-last.x,dy=e.clientY-last.y,dt=Math.max(1,now-last.t);
+    if(st.mode==='orbit')M3.jumpTo({bearing:M3.getBearing()-dx*.38,pitch:Math.max(0,Math.min(85,M3.getPitch()-dy*.32))});else M3.panBy([-dx,-dy],{duration:0});
+    vel={x:dx/dt*16,y:dy/dt*16};last={x:e.clientX,y:e.clientY,t:now};m3.touched=now});
+  const up=e=>{if(!st||e.pointerId!==st.id)return;const mode=st.mode;st=null;m3.touched=performance.now();if(!vel||performance.now()-last.t>80)return;
+    const step=()=>{vel.x*=.92;vel.y*=.92;if(Math.abs(vel.x)+Math.abs(vel.y)<.15){vel=null;return}
+      if(mode==='orbit')M3.jumpTo({bearing:M3.getBearing()-vel.x*.38,pitch:Math.max(0,Math.min(85,M3.getPitch()-vel.y*.32))});else M3.panBy([-vel.x,-vel.y],{duration:0});m3.touched=performance.now();inert=requestAnimationFrame(step)};inert=requestAnimationFrame(step)};
+  cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  // dos dedos: pellizcar para acercar y girar (nativo de MapLibre)
+  M3.touchZoomRotate.enable();M3.touchPitch.enable();M3.keyboard.enable()}
 function m3Base(){if(!M3||!M3.getLayer('sat'))return;const b=m3.base;M3.setLayoutProperty('sat','visibility',b==='min'?'none':'visible');
   M3.setPaintProperty('sat','raster-saturation',b==='soft'?-.85:0);M3.setPaintProperty('sat','raster-brightness-max',b==='soft'?.55:1);M3.setPaintProperty('sat','raster-contrast',b==='soft'?-.15:0)}
 function m3Home(d){if(!M3)return;const b=L.latLngBounds(Object.values(BASE).flatMap(x=>x.ll));M3.flyTo({center:[b.getCenter().lng,b.getCenter().lat],zoom:innerWidth<700?10.8:12.2,pitch:58,bearing:-28,duration:d||2400,essential:true})}
@@ -3247,8 +3266,8 @@ async function render3d(force){if(!$('#ctl3d').innerHTML||force)m3Ui();
   const b=L.latLngBounds(Object.values(BASE).flatMap(x=>x.ll));
   M3=new maplibregl.Map({container:'map3d',style:{version:8,sources:{sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:17,attribution:'Imagen © Esri'}},
     layers:[{id:'bg',type:'background',paint:{'background-color':'#0d1310'}},{id:'sat',type:'raster',source:'sat',layout:{visibility:'none'},paint:{'raster-fade-duration':400}}]},
-    center:[b.getCenter().lng,b.getCenter().lat],zoom:10.6,pitch:0,bearing:0,maxPitch:80,antialias:true,attributionControl:{compact:true}});
-  M3.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'bottom-right');
+    center:[b.getCenter().lng,b.getCenter().lat],zoom:10.6,pitch:0,bearing:0,maxPitch:85,antialias:true,dragRotate:false,dragPan:false,attributionControl:{compact:true}});
+  M3.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'bottom-right');m3Orbit();
   const stop=()=>{m3.touched=performance.now()};['mousedown','touchstart','wheel','dragstart'].forEach(ev=>M3.on(ev,stop));
   M3.on('load',()=>{const g=m3._g=geo3d();
     M3.setLight({anchor:'map',color:'#ffffff',intensity:.42,position:[1.4,210,35]});
