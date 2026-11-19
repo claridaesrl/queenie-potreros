@@ -2256,7 +2256,7 @@ function renderMap(){
   Object.keys(layers).forEach(id=>{if(!seen.has(id)){unitGroup.removeLayer(layers[id]);labels[id].remove();delete layers[id];delete labels[id]}});
   // elements
   const seenE=new Set();
-  Object.entries(S.el).forEach(([k,e])=>{if(!e.g||!e.g.c||!e.g.c.length)return;seenE.add(k);const T=tipoOf(e.tipo),st=elStyle(e),hid=S.hide['t_'+e.tipo]||(e.tipo==='camino'&&S.hide['rd_'+((e.f||{}).Tipo||'Principal')]);let ly=elLayers[k];const s=sig([e.g,e.tipo]);
+  Object.entries(S.el).forEach(([k,e])=>{if(!e.g||!e.g.c||!e.g.c.length)return;seenE.add(k);const T=tipoOf(e.tipo),st=elStyle(e),hid=S.hide['t_'+e.tipo]||(e.tipo==='camino'&&S.hide['rd_'+((e.f||{}).Tipo||'Principal')])||(e.g.t==='pt'&&map.getZoom()<14&&S.selE!==k&&st.col!=='#d50000'&&GE.layer!==elLayers[k]);let ly=elLayers[k];const s=sig([e.g,e.tipo]);
     if(ly&&ly._sig!==s&&GE.layer!==ly){elGroup.removeLayer(ly);ly=null}
     if(!ly){if(e.g.t==='pt')ly=L.marker(e.g.c[0],{icon:emIcon(T,st,false,e)});else if(e.g.t==='line')ly=L.polyline(e.g.c,{});else ly=L.polygon(e.g.c,{});
       ly._sig=s;ly.on('click',()=>{if(!S.drawing)selectEl(k)});ly.bindTooltip(()=>`${T.ic} ${esc(e.nombre||T.n)}`,{sticky:true});elLayers[k]=ly}
