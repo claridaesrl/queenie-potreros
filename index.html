@@ -1050,6 +1050,7 @@ input,select,textarea{font-size:16px}.btn{padding:9px 12px}.btn.sm{padding:7px 1
   <button data-v="agro">🌾 Agricultura y trabajos</button>
   <button data-v="cfg">⚙️ Parámetros</button>
   <button data-v="usr" style="display:none">👥 Usuarios</button>
+  <button data-v="sys" class="rol-dev">🛡️ Sistema</button>
   <span id="sync">Conectando…</span>
 </nav>
 <main>
@@ -1062,6 +1063,7 @@ input,select,textarea{font-size:16px}.btn{padding:9px 12px}.btn.sm{padding:7px 1
   <section class="view" id="v-agro"><div class="scroll" id="agroBox"></div></section>
   <section class="view" id="v-cfg"><div class="scroll" id="cfgBox"></div></section>
   <section class="view" id="v-usr"><div class="scroll" id="usrBox"></div></section>
+  <section class="view" id="v-sys"><div class="scroll" id="sysBox"></div></section>
 </main>
 <div id="modal"><div class="box" id="mbox"></div></div>
 <div id="toast"></div>
@@ -1954,7 +1956,7 @@ const SUPA=/*SUPA*/{"url":"https://jvftfwmecvnnuoupqkov.supabase.co","key":"sb_p
 let SB=null;
 const Store={mode:'local',db:null,q:{},outbox:[],
   lsGet(k,def){try{return JSON.parse(localStorage.getItem('queenie_'+k))??def}catch{return def}},
-  lsSet(k,v){try{localStorage.setItem('queenie_'+k,JSON.stringify(v))}catch{}},
+  lsSet(k,v){try{localStorage.setItem('queenie_'+k,JSON.stringify(v))}catch(e){try{if(k==='fot'){localStorage.setItem('queenie_fot',JSON.stringify(Object.fromEntries(Object.entries(v||{}).map(([a,f])=>[a,{...f,data:undefined}]))));return}Object.keys(localStorage).filter(x=>x.startsWith('queenie_bk_')).forEach(x=>localStorage.removeItem(x));localStorage.setItem('queenie_'+k,JSON.stringify(v))}catch(x){}}},
   loadLocal(){S.pot=this.lsGet('pot',{});S.lotes=this.lsGet('lotes',{});S.el=this.lsGet('el',{});S.mod=this.lsGet('mod',{});S.trk=this.lsGet('trk',{});S.fot=this.lsGet('fot',{});S.movs=this.lsGet('movs',[]);mergeCfg(this.lsGet('cfg',null));this.outbox=this.lsGet('outbox',[])},
   saveCache(){Object.values(COLS).forEach(k=>this.lsSet(k,S[k]));this.lsSet('movs',S.movs);this.lsSet('cfg',S.cfg)},
   async init(){
@@ -1979,15 +1981,15 @@ const Store={mode:'local',db:null,q:{},outbox:[],
     const r=data===null?await SB.from('docs').delete().eq('col',col).eq('id',id):await SB.from('docs').upsert({col,id,data,updated_at:new Date().toISOString()});
     if(r.error)throw r.error},
   async flush(){if(this.mode!=='supa'||!navigator.onLine||this._fl)return;this._fl=true;
-    try{while(this.outbox.length){const op=this.outbox[0];try{await this.supaWrite(op)}catch(e){if(/permission|policy|denied|violates|Sin permiso/i.test(e.message||'')){toast('Sin permiso: '+(e.message||''));this.outbox.shift();continue}throw e}this.outbox.shift();this.lsSet('outbox',this.outbox)}syncLabel()}catch(e){syncLabel()}finally{this._fl=false}},
+    try{while(this.outbox.length){const op=this.outbox[0];try{await this.supaWrite(op)}catch(e){const m=e.message||'';if(/JWT|expired|401|token/i.test(m)){await SB.auth.refreshSession().catch(()=>{});throw e}if(/permission|policy|denied|violates|Sin permiso|docs_tamano|check constraint/i.test(m)){toast(/docs_tamano|check constraint/.test(m)?'Un dato era demasiado grande y no se guardó':'Sin permiso: '+m);logErr('guardar '+op.col,e);this.outbox.shift();this.lsSet('outbox',this.outbox);continue}throw e}this.outbox.shift();this.lsSet('outbox',this.outbox)}syncLabel()}catch(e){syncLabel()}finally{this._fl=false}},
   async write(col,id,data){
     if(this.mode==='supa'){this.applyLocal(col,id,data);this.outbox.push({col,id,data});this.lsSet('outbox',this.outbox);syncLabel();return this.flush()}
     if(this.mode==='db')return this.chain(col+'/'+id,()=>data===null?this.db.collection(col).doc(id).delete():this.db.collection(col).doc(id).set(data)).catch(e=>{handleErr(e);throw e});
     this.applyLocal(col,id,data);this.saveCache()},
-  async set(col,id,data){data=JSON.parse(JSON.stringify(data));if(col==='config'&&this.mode!=='supa'&&this.mode!=='db'){S.cfg=data;this.lsSet('cfg',data);schedule();return}return this.write(col,id,data)},
+  async set(col,id,data){data=JSON.parse(JSON.stringify(data));if(col==='lotes'&&data){data.cab=Math.max(0,Math.round(+data.cab||0));if(data.peso!=null&&(+data.peso<0||+data.peso>1500))data.peso=null}if(col==='config'&&this.mode!=='supa'&&this.mode!=='db'){S.cfg=data;this.lsSet('cfg',data);schedule();return}return this.write(col,id,data)},
   async del(col,id){return this.write(col,id,null)}
 };
-window.addEventListener('online',()=>Store.flush());setInterval(()=>Store.flush(),20000);
+window.addEventListener('online',()=>{Store.flush();syncLabel()});window.addEventListener('offline',()=>syncLabel());setInterval(()=>Store.flush(),20000);
 function syncLabel(){if(Store.mode!=='supa')return;const n=Store.outbox.length;setSync(!navigator.onLine?`📴 Sin señal · ${n} cambio${n===1?'':'s'} por enviar`:n?`⏳ Enviando ${n} cambio${n===1?'':'s'}…`:`☁️ Sincronizado · ${esc(S.me?.nombre||'')} (${ROLN[S.rol]||S.rol})`)}
 // ================= Supabase: login, roles =================
 const ROLN={dev:'Desarrollador',encargado:'Encargado',campo:'Personal de campo',pendiente:'Pendiente'};
@@ -2005,7 +2007,7 @@ async function afterLogin(session){hideLogin();setSync('⏳ Conectando…');
   if(prof.rol==='pendiente'){showPending();return}
   applyRoleUI();await supaLoad();
   SB.channel('docs-rt').on('postgres_changes',{event:'*',schema:'public',table:'docs'},pl=>{const n=pl.new&&pl.new.col?pl.new:null,o=pl.old||{};
-    if(n){if(Store.outbox.some(x=>x.col===n.col&&x.id===n.id))return;Store.applyLocal(n.col,n.id,n.data)}else if(o.col)Store.applyLocal(o.col,o.id,null)}).subscribe();
+    if(n){if(Store.outbox.some(x=>x.col===n.col&&x.id===n.id))return;Store.applyLocal(n.col,n.id,n.data)}else if(o.col)Store.applyLocal(o.col,o.id,null)}).subscribe(st=>{SYS.rtOk=st==='SUBSCRIBED';if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'){setTimeout(()=>supaLoad().then(syncLabel),5000)}});
   Store.flush();syncLabel();if(S.rol==='dev')setTimeout(autoSeed,500)}
 async function supaLoad(){try{const all=[];for(let f=0;;f+=1000){const r=await SB.from('docs').select('col,id,data').range(f,f+999);if(r.error)throw r.error;all.push(...r.data);if(r.data.length<1000)break}
   const nw={pot:{},lotes:{},el:{},mod:{},trk:{},fot:{}};let movs=[],cfg=null;
@@ -3342,9 +3344,64 @@ function verTrk(k){const t=S.trk[k];if(!t||!map)return;trkShow=k;if(G.showLy)G.s
     if($('#tvC'))$('#tvC').onclick=()=>{closeModal();newElForm('camino',ll,{Tipo:'Callejón'})};
     if($('#tvD'))$('#tvD').onclick=()=>confirmBox('¿Eliminar el recorrido?',async()=>{try{await Store.del('tracks',k);if(G.showLy)G.showLy.remove();G.showLy=null;trkShow=null;toast('Eliminado')}catch(e){}})});renderSide(true)}
 
+// ================= seguridad y estabilidad =================
+const SYS={errs:[],lastErrToast:0,hiddenAt:0,lastSync:0,rtOk:false};
+try{SYS.errs=JSON.parse(localStorage.getItem('queenie_errs')||'[]')}catch(e){}
+function logErr(where,e){const m=String(e&&(e.message||e.reason&&e.reason.message||e.reason)||e).slice(0,300);if(/ResizeObserver|Script error|AbortError|Load failed|NetworkError|Failed to fetch/i.test(m))return;
+  SYS.errs.unshift({t:new Date().toISOString(),w:where,m});SYS.errs=SYS.errs.slice(0,40);try{localStorage.setItem('queenie_errs',JSON.stringify(SYS.errs))}catch(x){}
+  console.warn('[Queenie]',where,e);if(Date.now()-SYS.lastErrToast>15000){SYS.lastErrToast=Date.now();try{toast('⚠️ Hubo un error, pero la app sigue funcionando (queda registrado)')}catch(x){}}}
+window.addEventListener('error',e=>logErr('error',e.error||e.message));
+window.addEventListener('unhandledrejection',e=>logErr('promesa',e.reason));
+function safe(name,fn){try{return fn()}catch(e){logErr(name,e)}}
+// respaldo local automático (1 por día, guarda los últimos 3, sin las fotos)
+function snapshot(){return{v:1,fecha:new Date().toISOString(),pot:S.pot,lotes:S.lotes,el:S.el,mod:S.mod,trk:S.trk,cfg:S.cfg,movs:S.movs,fotMeta:Object.fromEntries(Object.entries(S.fot||{}).map(([k,f])=>[k,{...f,data:f.data?'(foto local)':undefined}]))}}
+function autoBackup(){try{if(!Object.keys(S.mod).length)return;const d=todayS(),k='queenie_bk_'+d;if(localStorage.getItem(k))return;
+  let snap=JSON.stringify(snapshot());const ks=Object.keys(localStorage).filter(x=>x.startsWith('queenie_bk_')).sort();while(ks.length>=3)localStorage.removeItem(ks.shift());
+  localStorage.setItem(k,snap)}catch(e){try{Object.keys(localStorage).filter(x=>x.startsWith('queenie_bk_')).forEach(x=>localStorage.removeItem(x))}catch(x){}}}
+setInterval(autoBackup,10*60*1000);setTimeout(autoBackup,20000);
+function dlJSON(obj,name){const b=new Blob([JSON.stringify(obj)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},500)}
+async function restoreJSON(file){const txt=await file.text();let d;try{d=JSON.parse(txt)}catch(e){toast('El archivo no es un respaldo válido');return}
+  if(!d||!d.mod||!d.lotes){toast('El archivo no es un respaldo de Queenie');return}
+  confirmBox(`¿Restaurar el respaldo del ${esc((d.fecha||'').slice(0,16).replace('T',' '))}? Se reemplazan módulos, lotes, potreros, elementos y parámetros por los del respaldo. Lo actual queda en el historial.`,async()=>{
+    toast('Restaurando…');const sets=[['potreros',d.pot],['lotes',d.lotes],['elems',d.el],['modulos',d.mod],['tracks',d.trk||{}]];
+    for(const[col,o]of sets){const key=COLS[col];for(const k of Object.keys(S[key]||{}))if(!(k in o))await Store.del(col,k);for(const[k,v]of Object.entries(o||{}))await Store.set(col,k,v)}
+    if(d.cfg)await Store.set('config','main',d.cfg);toast('✅ Respaldo restaurado')})}
+// resincronizar al volver a la app y vigilar la conexión en vivo
+document.addEventListener('visibilitychange',()=>{if(document.hidden){SYS.hiddenAt=Date.now();return}
+  if(Store.mode==='supa'&&SB&&S.rol&&S.rol!=='pendiente'&&SYS.hiddenAt&&Date.now()-SYS.hiddenAt>3*60*1000){supaLoad().then(()=>{Store.flush();syncLabel()})}});
+async function sysPanel(){const box=$('#sysBox');if(!box)return;let u=null;if(Store.mode==='supa'&&SB){try{const r=await SB.rpc('sys_uso');u=r.data}catch(e){}}
+  const pct=(a,b)=>Math.min(100,a/b*100),bar=(p,txt)=>`<div style="background:#eef2ee;border-radius:6px;height:10px;overflow:hidden;margin:4px 0"><div style="width:${p}%;height:100%;background:${p>85?'#d93025':p>60?'#f2c218':'#2e9e44'}"></div></div><div class="small muted">${txt}</div>`;
+  const ls=(()=>{let n=0;try{for(const k of Object.keys(localStorage))n+=(localStorage.getItem(k)||'').length*2}catch(e){}return n})();
+  const bks=Object.keys(localStorage).filter(x=>x.startsWith('queenie_bk_')).sort().reverse();
+  box.innerHTML=`<div class="card"><h2>🛡️ Estado y seguridad del sistema</h2>
+  <div class="stats" style="grid-template-columns:repeat(4,1fr)"><div class="stat"><b>${navigator.onLine?'🟢':'🔴'}</b><span>${navigator.onLine?'Con internet':'Sin internet'}</span></div><div class="stat"><b>${Store.outbox.length}</b><span>Cambios por enviar</span></div><div class="stat"><b>${Store.mode==='supa'?'☁️':'💾'}</b><span>${Store.mode==='supa'?'Base compartida':'Solo este equipo'}</span></div><div class="stat"><b>${SYS.errs.length}</b><span>Errores registrados</span></div></div>
+  ${u?`<h3>Uso del plan gratuito</h3><b class="small">Base de datos</b>${bar(pct(u.db_bytes,500e6),`${fmt(u.db_bytes/1e6,1)} MB de 500 MB · ${fmt(u.docs)} registros · ${fmt(u.hist)} versiones en el historial`)}
+  <b class="small">Fotos</b>${bar(pct(u.fotos_bytes,1e9),`${fmt(u.fotos_bytes/1e6,1)} MB de 1.000 MB · ${fmt(u.fotos_n)} fotos (≈ ${fmt(Math.max(0,(1e9-u.fotos_bytes)/250e3))} fotos más)`)}
+  <div class="small muted">Usuarios: ${u.usuarios} · Último cambio guardado: ${u.ultimo_cambio?new Date(u.ultimo_cambio).toLocaleString('es-PY'):'–'}</div>
+  <div class="info">El plan gratis de Supabase pausa la base si pasa <b>una semana sin uso</b>. Mientras alguien abra la app al menos una vez por semana, no se pausa.</div>`:''}
+  <h3>Respaldos</h3><p class="small muted">La app guarda sola una copia diaria en este equipo (las últimas 3)${Store.mode==='supa'?' y la base guarda cada versión anterior de cada dato durante 120 días':''}. Descargá un respaldo completo de vez en cuando y guardalo en tu Drive o compu.</p>
+  <div class="row"><button class="btn p" id="syBk">⬇ Descargar respaldo completo</button><label class="btn">⬆ Restaurar respaldo<input type="file" accept=".json,application/json" id="syRs" hidden></label></div>
+  ${bks.length?`<div class="small" style="margin-top:8px">Copias automáticas en este equipo: ${bks.map(k=>`<a href="#" data-bk="${k}">${dFmt(k.slice(11))}</a>`).join(' · ')}</div>`:''}
+  ${Store.mode==='supa'?`<h3>Recuperar algo borrado o cambiado</h3><div class="row"><label class="f">Buscar en el historial (lote, módulo, potrero…)<input id="syHq" placeholder="Ej: Mód. 4, Toro, 54"></label><button class="btn" id="syHs" style="align-self:flex-end">Buscar</button></div><div id="syHr"></div>`:''}
+  <h3>Mantenimiento</h3><div class="row"><button class="btn" id="sySy">🔄 Forzar sincronización</button><button class="btn" id="syCc">🧹 Limpiar caché y recargar</button>${SYS.errs.length?'<button class="btn" id="syEc">Borrar registro de errores</button>':''}</div>
+  <div class="small muted" style="margin-top:6px">Espacio usado en este equipo: ${fmt(ls/1e6,2)} MB</div>
+  ${SYS.errs.length?`<h3>Últimos errores</h3><div class="tbl" style="max-height:220px"><table><tbody>${SYS.errs.slice(0,15).map(e=>`<tr><td class="small">${esc(e.t.slice(0,16).replace('T',' '))}</td><td class="small">${esc(e.w)}</td><td class="small" style="white-space:normal">${esc(e.m)}</td></tr>`).join('')}</tbody></table></div>`:''}
+  <p class="small muted" style="margin-top:14px;font-style:italic;text-align:center">Desarrollado por Dr. Ronald Robertti · CLARIDAE</p></div>`;
+  $('#syBk').onclick=()=>{dlJSON(snapshot(),`Queenie_respaldo_${todayS()}.json`);toast('Respaldo descargado')};
+  $('#syRs').onchange=e=>{const f=e.target.files[0];if(f)restoreJSON(f)};
+  box.querySelectorAll('[data-bk]').forEach(a=>a.onclick=ev=>{ev.preventDefault();try{dlJSON(JSON.parse(localStorage.getItem(a.dataset.bk)),`Queenie_respaldo_${a.dataset.bk.slice(11)}.json`)}catch(e){toast('No se pudo leer la copia')}});
+  $('#sySy').onclick=async()=>{if(Store.mode==='supa'){await supaLoad();await Store.flush()}renderAll();sysPanel();toast('Sincronizado')};
+  $('#syCc').onclick=()=>confirmBox('Se borra la copia guardada en este equipo y se vuelve a bajar todo. Los cambios sin enviar se mantienen. ¿Seguir?',async()=>{try{const ob=Store.outbox;Object.keys(localStorage).filter(k=>k.startsWith('queenie_')&&!/auth|outbox|bk_|errs/.test(k)).forEach(k=>localStorage.removeItem(k));Store.lsSet('outbox',ob);if('caches' in window){for(const k of await caches.keys())if(k!=='queenie-tiles')await caches.delete(k)}}catch(e){}location.reload()});
+  if($('#syEc'))$('#syEc').onclick=()=>{SYS.errs=[];localStorage.removeItem('queenie_errs');sysPanel()};
+  if($('#syHs'))$('#syHs').onclick=async()=>{const q=$('#syHq').value.trim().toLowerCase();const r=await SB.from('docs_hist').select('hid,col,id,data,op,at').order('at',{ascending:false}).limit(400);if(r.error){$('#syHr').innerHTML='<div class="warn">'+esc(r.error.message)+'</div>';return}
+    const L=(r.data||[]).filter(h=>!q||JSON.stringify(h.data||{}).toLowerCase().includes(q)||h.id.toLowerCase().includes(q)).slice(0,40);
+    const nm=h=>{const d=h.data||{};return h.col==='lotes'?`${d.cat||''} · ${fmt(d.cab)} cab · ${(MOD[d.mod]||{}).nombre||d.pot||''}`:h.col==='modulos'?(d.sector||'')+' · '+(d.nombre||h.id):h.col==='elems'?(d.nombre||d.tipo||h.id):h.col==='potreros'?'Potrero '+(d.id||h.id):h.id};
+    $('#syHr').innerHTML=L.length?`<div class="tbl" style="max-height:300px"><table><thead><tr><th>Fecha</th><th>Qué</th><th>Cambio</th><th></th></tr></thead><tbody>${L.map(h=>`<tr><td class="small">${new Date(h.at).toLocaleString('es-PY')}</td><td class="small" style="white-space:normal">${esc({lotes:'Lote',modulos:'Módulo',elems:'Elemento',potreros:'Potrero',config:'Parámetros',movs:'Movimiento',fotos:'Foto',tracks:'Recorrido'}[h.col]||h.col)}: ${esc(nm(h))}</td><td class="small">${h.op==='DELETE'?'🗑 Borrado':'✎ Versión anterior'}</td><td><button class="btn sm" data-hr="${h.hid}">↺ Recuperar</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="muted small">Nada encontrado.</div>';
+    $('#syHr').querySelectorAll('[data-hr]').forEach(b=>b.onclick=()=>{const h=L.find(x=>String(x.hid)===b.dataset.hr);confirmBox('¿Volver este dato a como estaba en esa fecha?',async()=>{try{await Store.set(h.col,h.id,h.data);toast('✅ Recuperado')}catch(e){}})})}}
+
 // ================= routing =================
-const VIEWS=['mapa','potreros','hacienda','proy','prod','3d','agro','cfg','usr'];
-function showView(v){if(!VIEWS.includes(v))v='mapa';document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));S.view=v;try{if(location.hash!=='#'+v)history.replaceState(null,'','#'+v)}catch{}renderView(true);if(v==='mapa'&&map)setTimeout(()=>map.invalidateSize(),50)}
+const VIEWS=['mapa','potreros','hacienda','proy','prod','3d','agro','cfg','usr','sys'];
+function showView(v){if(!VIEWS.includes(v)||(v==='sys'&&!can('*')))v='mapa';document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));S.view=v;try{if(location.hash!=='#'+v)history.replaceState(null,'','#'+v)}catch{}renderView(true);if(v==='mapa'&&map)setTimeout(()=>map.invalidateSize(),50)}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.v));
 window.addEventListener('hashchange',()=>showView(location.hash.slice(1)));
 const editing=sel=>{const a=document.activeElement;return a&&a.closest&&a.closest(sel)&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)};
@@ -3354,17 +3411,18 @@ function renderView(force){const v=S.view||'mapa';
   else if(v==='proy'){if(force||!editing('#proyBox'))renderProy()}else if(v==='agro'){if(force||!editing('#agroBox'))renderAgro()}
   else if(v==='cfg'){if(force||!editing('#cfgBox'))renderCfg()}
   else if(v==='usr'){if(force)renderUsers()}
+  else if(v==='sys'){if(force)sysPanel()}
   else if(v==='prod'){if(force||!editing('#prodBox'))renderProd()}
   else if(v==='3d'){render3d(force)}}
 function calcAll(){potCalcCache={};modCalcCache={};UL.forEach(p=>potCalcCache[p.id]=potCalc(p.id));ML.forEach(m=>modCalcCache[m.id]=modCalc(m.id))}
-function renderAll(){buildUnits();calcAll();if(S.sel&&!POT[S.sel])S.sel=null;if(S.selE&&!S.el[S.selE])S.selE=null;renderKpis();renderView()}
+function renderAll(){try{buildUnits();calcAll()}catch(e){logErr('cálculo',e)}if(S.sel&&!POT[S.sel])S.sel=null;if(S.selE&&!S.el[S.selE])S.selE=null;safe('encabezado',renderKpis);safe('vista '+(S.view||''),()=>renderView())}
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(S.drawing)stopDraw();else if($('#modal').classList.contains('on'))closeModal()}});
 buildUnits();calcAll();
 initMap();
 S.view=VIEWS.includes(location.hash.slice(1))?location.hash.slice(1):'mapa';
 showView(S.view);
 Store.init();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
+if('serviceWorker' in navigator){navigator.serviceWorker.register('sw.js').then(r=>setInterval(()=>r.update().catch(()=>{}),30*60*1000)).catch(()=>{});let _sw=0;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(_sw++)return;toast('🔄 App actualizada a la última versión')})}
 </script>
 </body>
 </html>
