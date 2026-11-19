@@ -1028,6 +1028,8 @@ header{flex-wrap:nowrap!important}header .kpis{display:none!important}header .fi
 .mchip{font-size:11px!important;padding:2px 6px!important}
 details.blk>summary{font-size:14px}
 }
+.stf{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:4px;white-space:nowrap;pointer-events:auto;cursor:pointer}.stf b{width:30px;height:30px;border-radius:50%;background:var(--c);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;border:2.5px solid #fff;box-shadow:0 1px 6px rgba(0,0,0,.5)}.stf span{background:rgba(255,255,255,.95);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:600;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.stf.live b{animation:stp 2s infinite}@keyframes stp{0%{box-shadow:0 0 0 0 var(--c)}70%{box-shadow:0 0 0 12px transparent}100%{box-shadow:0 0 0 0 transparent}}
 details.blk{border:1px solid var(--line);border-radius:10px;padding:8px 10px;margin:10px 0}details.blk>summary{cursor:pointer;font-weight:700;color:var(--pri)}details.blk[open]>summary{margin-bottom:8px}
 #lyrctl details.more>summary{cursor:pointer;margin-top:6px}
 @media(max-width:900px){.grid2{grid-template-columns:1fr}
@@ -1062,6 +1064,7 @@ input,select,textarea{font-size:16px}.btn{padding:9px 12px}.btn.sm{padding:7px 1
   <button data-v="3d">🧊 3D</button>
   <button data-v="agro">🌾 Agricultura y trabajos</button>
   <button data-v="cfg">⚙️ Parámetros</button>
+  <button data-v="personal" class="rol-enc" style="display:none">🧑‍🌾 Personal</button>
   <button data-v="usr" style="display:none">👥 Usuarios</button>
   <button data-v="sys" class="rol-dev">🛡️ Sistema</button>
   <span id="sync">Conectando…</span>
@@ -1075,6 +1078,7 @@ input,select,textarea{font-size:16px}.btn{padding:9px 12px}.btn.sm{padding:7px 1
   <section class="view" id="v-3d"><div id="map3d"></div><div id="ctl3d"></div></section>
   <section class="view" id="v-agro"><div class="scroll" id="agroBox"></div></section>
   <section class="view" id="v-cfg"><div class="scroll" id="cfgBox"></div></section>
+  <section class="view" id="v-personal"><div class="scroll" id="perBox"></div></section>
   <section class="view" id="v-usr"><div class="scroll" id="usrBox"></div></section>
   <section class="view" id="v-sys"><div class="scroll" id="sysBox"></div></section>
 </main>
@@ -2024,7 +2028,7 @@ async function afterLogin(session){hideLogin();setSync('⏳ Conectando…');
   applyRoleUI();await supaLoad();
   SB.channel('docs-rt').on('postgres_changes',{event:'*',schema:'public',table:'docs'},pl=>{const n=pl.new&&pl.new.col?pl.new:null,o=pl.old||{};
     if(n){if(Store.outbox.some(x=>x.col===n.col&&x.id===n.id))return;Store.applyLocal(n.col,n.id,n.data)}else if(o.col)Store.applyLocal(o.col,o.id,null)}).subscribe(st=>{SYS.rtOk=st==='SUBSCRIBED';if(st==='CHANNEL_ERROR'||st==='TIMED_OUT'){setTimeout(()=>supaLoad().then(syncLabel),5000)}});
-  Store.flush();syncLabel();if(S.rol==='dev')setTimeout(autoSeed,500)}
+  Store.flush();syncLabel();if(S.rol==='dev')setTimeout(autoSeed,500);staffInit()}
 async function supaLoad(){try{const all=[];for(let f=0;;f+=1000){const r=await SB.from('docs').select('col,id,data').range(f,f+999);if(r.error)throw r.error;all.push(...r.data);if(r.data.length<1000)break}
   const nw={pot:{},lotes:{},el:{},mod:{},trk:{},fot:{}};let movs=[],cfg=null;
   all.forEach(d=>{if(d.col==='config')cfg=d.data;else if(d.col==='movs')movs.push({...d.data,_id:d.id});else if(COLS[d.col])nw[COLS[d.col]][d.id]=d.data});
@@ -2054,11 +2058,11 @@ function showLogin(msg){const el=loginBox();el.style.display='flex';
 function hideLogin(){const el=$('#login');if(el)el.style.display='none'}
 function showPending(){const el=loginBox();el.style.display='flex';el.innerHTML=`<div class="lbox"><h2>⏳ Esperando aprobación</h2><p>Hola <b>${esc(S.me.nombre||S.me.email)}</b>. Tu cuenta está creada; el administrador tiene que asignarte un rol (Encargado o Personal de campo).</p><div class="row"><button class="btn" id="pdR">Volver a intentar</button><button class="btn" id="pdO">Salir</button></div></div>`;
   $('#pdR').onclick=async()=>{const{data:{session}}=await SB.auth.getSession();if(session)afterLogin(session)};$('#pdO').onclick=()=>SB.auth.signOut()}
-const NAVL={mapa:['🗺️ Mapa','🗺️ Mapa'],potreros:['📋 Potreros y corrales','📋 Potreros'],hacienda:['📒 Planilla hacienda','📒 Hacienda'],proy:['📈 Proyección','📈 Proyección'],prod:['💰 Producción y costos','💰 Costos'],'3d':['🧊 3D','🧊 3D'],agro:['🌾 Agricultura y trabajos','🌾 Agro'],cfg:['⚙️ Parámetros','⚙️ Ajustes'],usr:['👥 Usuarios','👥 Usuarios'],sys:['🛡️ Sistema','🛡️ Sistema']};
+const NAVL={mapa:['🗺️ Mapa','🗺️ Mapa'],potreros:['📋 Potreros y corrales','📋 Potreros'],hacienda:['📒 Planilla hacienda','📒 Hacienda'],proy:['📈 Proyección','📈 Proyección'],prod:['💰 Producción y costos','💰 Costos'],'3d':['🧊 3D','🧊 3D'],agro:['🌾 Agricultura y trabajos','🌾 Agro'],cfg:['⚙️ Parámetros','⚙️ Ajustes'],usr:['👥 Usuarios','👥 Usuarios'],personal:['🧑‍🌾 Personal','🧑‍🌾 Personal'],sys:['🛡️ Sistema','🛡️ Sistema']};
 function navLabels(){const m=MOB()?1:0;document.querySelectorAll('nav button[data-v]').forEach(b=>{const l=NAVL[b.dataset.v];if(l)b.textContent=l[m]})}
 addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>{navLabels();if(map){renderMap();renderLabels()}},300)});setTimeout(navLabels,0);
 function applyRoleUI(){document.body.dataset.rol=S.rol||'dev';const b=document.querySelector('nav button[data-v="cfg"]');if(b)b.style.display=can('*')?'':'none';
-  const ub=document.querySelector('nav button[data-v="usr"]');if(ub)ub.style.display=(Store.mode==='supa'&&can('*'))?'':'none';const ab=$('#addBtn');if(ab)ab.style.display=can('*')?'':'none';renderView(true)}
+  const pb=document.querySelector('nav button[data-v="personal"]');if(pb)pb.style.display=(Store.mode==='supa'&&can('lote'))?'':'none';const ub=document.querySelector('nav button[data-v="usr"]');if(ub)ub.style.display=(Store.mode==='supa'&&can('*'))?'':'none';const ab=$('#addBtn');if(ab)ab.style.display=can('*')?'':'none';renderView(true)}
 async function renderUsers(){const box=$('#usrBox');if(!SB){box.innerHTML='<div class="empty">Disponible con la base compartida (Supabase).</div>';return}
   const r=await SB.from('profiles').select('*').order('created_at');const us=r.data||[];
   box.innerHTML=`<div class="card"><h2>👥 Usuarios y roles</h2><p class="small muted">Cada persona entra al link, toca “Crear cuenta” con su correo y acá le asignás el rol. <b>Desarrollador</b>: todo. <b>Encargado</b>: hacienda, pesajes, rotaciones, bajas, evaluaciones, trabajos, fotos y recorridos. <b>Personal de campo</b>: ver el mapa y GPS, rotaciones/traslados, mortandad y transferencias con foto, fotos y recorridos.</p>
@@ -2183,7 +2187,7 @@ function renderLyrCtl(){mobDefaults();const d=$('#lyrctl');if(!d||d.contains(doc
   const tipos=S.cfg.tipos.filter(t=>Object.values(S.el).some(e=>e.tipo===t.k));
   if(S.lyrOpen==null)S.lyrOpen=innerWidth>900;
   d.innerHTML=`<details id="lyrDet" ${S.lyrOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🗂️<span class="lyt"> Capas y colores</span></summary><b>Colorear por</b><br><select id="cmode">${[['mod','Semáforo de módulos'],['modc','Módulos (color de cada uno)'],['sector','Sectores (cada módulo en otro tono)'],['sem','Semáforo de cada potrero'],['past','Tipo de pastura'],['carga','Carga vs receptividad'],['proy','Días al peso objetivo'],['cat','Categoría principal'],['clase','Clase (potrero/corral)']].map(([v,t])=>`<option value="${v}" ${S.colorMode===v?'selected':''}>${t}</option>`).join('')}</select>
-  <label><input type="checkbox" data-h="lbl" ${S.hide.lbl?'':'checked'}> Etiquetas</label><label><input type="checkbox" data-h="herd" ${S.hide.herd?'':'checked'}> 🐄 Carteles de módulos y hacienda</label>${Object.values(S.el).some(e=>e.tipo==='bebe')?'':`<label><input type="checkbox" data-h="beb" ${S.hide.beb?'':'checked'}> 💧 Bebederos mapa 2023</label>`}
+  <label><input type="checkbox" data-h="lbl" ${S.hide.lbl?'':'checked'}> Etiquetas</label><label><input type="checkbox" data-h="herd" ${S.hide.herd?'':'checked'}> 🐄 Carteles de módulos y hacienda</label>${canSeeStaff()?`<label><input type="checkbox" data-h="staff" ${S.hide.staff?'':'checked'}> 🧑‍🌾 Personal en vivo</label>`:''}${Object.values(S.el).some(e=>e.tipo==='bebe')?'':`<label><input type="checkbox" data-h="beb" ${S.hide.beb?'':'checked'}> 💧 Bebederos mapa 2023</label>`}
   <label><input type="checkbox" data-h="sb" ${S.hide.sb?'':'checked'}> ┅ Límite de sectores</label>
   ${S.cfg.sectores.filter(x=>ML.some(m=>m.sector===x.n)).map(x=>`<label><input type="checkbox" data-h="sec_${esc(x.n)}" ${S.hide['sec_'+x.n]?'':'checked'}> <i class="dot" style="background:${x.col}"></i> ${esc(x.n)}</label>`).join('')}
   <details class="more"><summary>Más capas…</summary><label><input type="checkbox" data-h="mo" ${S.hide.mo?'':'checked'}> ▭ Contorno de módulos</label>
@@ -2193,7 +2197,7 @@ function renderLyrCtl(){mobDefaults();const d=$('#lyrctl');if(!d||d.contains(doc
 </details></details>`;
   $('#lyrDet').ontoggle=e=>{S.lyrOpen=e.target.open};
   $('#cmode').onchange=e=>{S.colorMode=e.target.value;renderMap()};
-  d.querySelectorAll('[data-h]').forEach(c=>c.onchange=()=>{const k=c.dataset.h;S.hide[k]=!c.checked;renderMap()});
+  d.querySelectorAll('[data-h]').forEach(c=>c.onchange=()=>{const k=c.dataset.h;S.hide[k]=!c.checked;renderMap();renderStaff()});
 }
 function colorFor(id){const c=potCalcCache[id],m=S.colorMode;
   if(m==='mod')return c.mod?SEMC[modCalcCache[c.mod].sem]:SEMC[c.sem];
@@ -2239,8 +2243,9 @@ function modShape(mid){const m=MOD[mid];if(m.geom&&m.geom.length>2)return[m.geom
   const out=rings.filter(r=>polyArea(r)>=polyArea(rings[0])*0.02).map(r=>r.map(([i,j])=>loc2ll(x0+i*CS,y0+j*CS)));
   MSC[mid]={key,rings:out};return out}
 let SBC={key:'',data:[]};
-function buildSectorBounds(){const key=sig([ML.map(m=>[m.sector,m.pots]),UL.length]);if(SBC.key===key)return SBC.data;
-  const CS=25,RAD=3,out=[];const bySec={};ML.forEach(m=>m.pots.forEach(p=>{if(POT[p])(bySec[m.sector]=bySec[m.sector]||[]).push(POT[p])}));
+function potSector(id){const d=potData(id);if(d&&d.sector)return d.sector;const m=POTMOD[id];return m&&MOD[m]?MOD[m].sector:null}
+function buildSectorBounds(){const key=sig([ML.map(m=>[m.sector,m.pots]),UL.length,UL.map(u=>potData(u.id).sector||'')]);if(SBC.key===key)return SBC.data;
+  const CS=25,RAD=3,out=[];const bySec={};UL.forEach(u=>{const sc=potSector(u.id);if(sc)(bySec[sc]=bySec[sc]||[]).push(u)});
   for(const[sec,us]of Object.entries(bySec)){let x0=1e12,y0=1e12,x1=-1e12,y1=-1e12;us.forEach(u=>u.c.forEach(([x,y])=>{x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y)}));
     const pad=(RAD+3)*CS;x0-=pad;y0-=pad;x1+=pad;y1+=pad;const W=Math.ceil((x1-x0)/CS),H=Math.ceil((y1-y0)/CS);let g=new Uint8Array(W*H);
     us.forEach(u=>{let a=1e12,b=1e12,c=-1e12,d=-1e12;u.c.forEach(([x,y])=>{a=Math.min(a,x);b=Math.min(b,y);c=Math.max(c,x);d=Math.max(d,y)});
@@ -2257,7 +2262,7 @@ function buildSectorBounds(){const key=sig([ML.map(m=>[m.sector,m.pots]),UL.leng
     labels.sort((a,b)=>b[0]-a[0]);const lab2=labels.map(x=>x[1]);labels.length=0;lab2.forEach(x=>labels.push(x));
     out.push({sec,segs,labels})}
   SBC={key,data:out};return out}
-function unitVisible(p){if(S.hide['cl_'+p.clase])return false;if(p.grupo&&S.hide['gr_'+p.grupo])return false;const m=POTMOD[p.id];if(m&&MOD[m]&&S.hide['sec_'+MOD[m].sector])return false;return true}
+function unitVisible(p){if(S.hide['cl_'+p.clase])return false;if(p.grupo&&S.hide['gr_'+p.grupo])return false;const sc=potSector(p.id);if(sc&&S.hide['sec_'+sc])return false;return true}
 function hull(pts){pts=pts.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);if(pts.length<3)return pts;const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);const lo=[],up=[];
   for(const p of pts){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],p)<=0)lo.pop();lo.push(p)}for(const p of pts.slice().reverse()){while(up.length>=2&&cr(up[up.length-2],up[up.length-1],p)<=0)up.pop();up.push(p)}up.pop();lo.pop();return lo.concat(up)}
 function shade(hex,p){const h=hex.replace('#','');let r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);const f=v=>Math.max(0,Math.min(255,Math.round(p>0?v+(255-v)*p:v*(1+p))));return '#'+[f(r),f(g),f(b)].map(v=>v.toString(16).padStart(2,'0')).join('')}
@@ -2399,8 +2404,8 @@ function renderSide(force){const el=$('#side');if(!force&&(el.contains(document.
   ${trabHtml(d.trab)}</details>
   <details class="rol-dev blk" ${GE.layer?'open':''}><summary>✏️ Forma, medidas, nombre y módulo</summary>${geoTools()}
   <div class="row"><label class="f">Clase<select id="fClase">${S.cfg.clases.map(x=>`<option ${x.n===p.clase?'selected':''}>${esc(x.n)}</option>`).join('')}</select></label><label class="f">Grupo<input id="fGrupo" value="${esc(p.grupo)}" placeholder="Ej: Confinamiento nuevo"></label></div>
-  <div class="row" style="margin-top:8px"><label class="f">Módulo<select id="fMod"><option value="">— sin módulo —</option>${ML.map(m=>`<option value="${esc(m.id)}" ${m.id===c.mod?'selected':''}>${esc(m.sector)} · ${esc(m.nombre)}</option>`).join('')}</select></label></div>
-  <div class="row" style="margin-top:8px"><button class="btn sm" id="saveCl">Guardar clase/grupo/módulo</button><button class="btn sm" id="renU">Cambiar nombre</button>${p.grupo&&S.cfg.grupos&&S.cfg.grupos[p.grupo]?'<button class="btn sm" id="editGrp">▦ Editar grupo completo</button>':''}<button class="btn sm d" id="delU">Eliminar</button></div></details>`;
+  <div class="row" style="margin-top:8px"><label class="f">Módulo<select id="fMod"><option value="">— sin módulo —</option>${ML.map(m=>`<option value="${esc(m.id)}" ${m.id===c.mod?'selected':''}>${esc(m.sector)} · ${esc(m.nombre)}</option>`).join('')}</select></label><label class="f">Sector<select id="fSec"><option value="">${POTMOD[id]&&MOD[POTMOD[id]]?'— el de su módulo ('+esc(MOD[POTMOD[id]].sector)+') —':'— sin sector —'}</option>${S.cfg.sectores.map(x=>`<option ${potData(id).sector===x.n?'selected':''}>${esc(x.n)}</option>`).join('')}</select></label></div>
+  <div class="row" style="margin-top:8px"><button class="btn sm p" id="saveCl">Guardar clase, grupo, módulo y sector</button><button class="btn sm" id="renU">Cambiar nombre</button>${p.grupo&&S.cfg.grupos&&S.cfg.grupos[p.grupo]?'<button class="btn sm" id="editGrp">▦ Editar grupo completo</button>':''}<button class="btn sm d" id="delU">Eliminar</button></div></details>`;
   let cond=d.cond||'';
   $('#fCond').querySelectorAll('button').forEach(b=>b.onclick=()=>{cond=cond===b.dataset.c?'':b.dataset.c;$('#fCond').querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.c===cond))});
   $('#xsel').onclick=clearSel;$('#addL').onclick=()=>loteForm(null,{pot:id,mod:c.mod||''});
@@ -2408,7 +2413,7 @@ function renderSide(force){const el=$('#side');if(!force&&(el.contains(document.
   el.querySelectorAll('[data-el]').forEach(b=>b.onclick=()=>selectEl(b.dataset.el));
   $('#saveE').onclick=async()=>{const patch={past:$('#fPast').value,cond,disp:$('#fDisp').value===''?null:+$('#fDisp').value,alt:$('#fAlt').value===''?null:+$('#fAlt').value,feval:$('#fFe').value,semMan:$('#fMan').value,notas:$('#fNot').value.trim(),f:{...(d.f||{}),...readFields($('#fExtra'),S.cfg.potCampos)},upd:new Date().toISOString()};
     try{await savePot(id,patch);document.activeElement.blur();renderAll();renderSide(true);toast('Guardado')}catch(e){}};
-  $('#saveCl').onclick=async()=>{try{await savePot(id,{clase:$('#fClase').value,grupo:$('#fGrupo').value.trim()});const nm=$('#fMod').value;if(nm!==(c.mod||''))await assignPotMod(id,nm);toast('Guardado')}catch(e){}};
+  $('#saveCl').onclick=async()=>{try{await savePot(id,{clase:$('#fClase').value,grupo:$('#fGrupo').value.trim(),sector:$('#fSec').value||null});const nm=$('#fMod').value;if(nm!==(c.mod||''))await assignPotMod(id,nm);toast('Guardado')}catch(e){}};
   $('#renU').onclick=()=>renameUnit(id);$('#delU').onclick=()=>deleteUnit(id);
   if($('#editGrp'))$('#editGrp').onclick=()=>openGen(p.grupo);
   $('#addTr').onclick=()=>trabForm({col:'potreros',id});el.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>trabForm({col:'potreros',id},b.dataset.tr));
@@ -3078,7 +3083,7 @@ function gpsOk(p){const{latitude:lat,longitude:lon,accuracy:ac,heading,speed}=p.
     G.acc=L.circle([lat,lon],{radius:ac,color:'#1a73e8',weight:1,fillColor:'#1a73e8',fillOpacity:.12,interactive:false}).addTo(map);G.mk=L.marker([lat,lon],{icon:gpsIcon(),interactive:false,zIndexOffset:2000}).addTo(map)}
   else{G.mk.setLatLng([lat,lon]).setIcon(gpsIcon());G.acc.setLatLng([lat,lon]).setRadius(ac)}
   G.trailLy.setLatLngs((G.rec?G.recPts:G.trail).map(t=>[t[0],t[1]]));G.trailLy.setStyle(G.rec?{color:'#ff1744',weight:5,opacity:.9,dashArray:null}:{color:'#1a73e8',weight:3,opacity:.6,dashArray:'2 6'});
-  const hits=UL.filter(q=>inPoly(x,y,q.c));const hit=hits.sort((a,b)=>a.ha-b.ha)[0];
+  const hits=UL.filter(q=>inPoly(x,y,q.c));const hit=hits.sort((a,b)=>a.ha-b.ha)[0];try{liveShare(lat,lon,x,y,ac,G.spd,hit)}catch(e){}
   let near=null;if(!hit){let md=1e12;UL.forEach(q=>{const d=distPoly(x,y,q.c);if(d<md){md=d;near={id:q.id,d}}})}
   const prev=G.here;G.here=hit?hit.id:null;
   if(G.follow){if(G.first)map.setView([lat,lon],ac>300?14:17);else map.panTo([lat,lon],{animate:true,duration:.5})}G.first=false;
@@ -3095,7 +3100,7 @@ function gpsOk(p){const{latitude:lat,longitude:lon,accuracy:ac,heading,speed}=p.
 function recStart(){G.rec=true;G.recPts=G.pos?[[G.pos.lat,G.pos.lon,G.pos.x,G.pos.y]]:[];G.follow=true;toast('⏺ Grabando recorrido: andá por el camino; tocá ⏹ al terminar');gpsMsg(G.msg)}
 function recStop(save=true){G.rec=false;const pts=G.recPts.map(t=>[+t[0].toFixed(7),+t[1].toFixed(7)]);G.recPts=[];if(G.trailLy)G.trailLy.setLatLngs(G.trail.map(t=>[t[0],t[1]]));
   if(!save)return;if(pts.length<2){toast('Muy pocos puntos grabados');gpsMsg(G.msg);return}newElForm('camino',pts,{Tipo:'Callejón'})}
-function gpsMsg(h){G.msg=h;const b=$('#gpsBar');b.style.display='flex';$('#mapwrap').classList.add('gpson');
+function gpsMsg(h){G.msg=h;if(typeof shareOn==='function'&&shareOn()){h+=` <span class="small" style="opacity:.75">${ST.fuera?'· 📡 fuera de EQE, no se comparte':'· 📡 compartida con la administración'}</span>`;if(!Store.lsGet('avisoUbic',false)){Store.lsSet('avisoUbic',true);setTimeout(()=>modal(`<h2>📡 Ubicación compartida</h2><p>Mientras tengas la app abierta con 📍 activado y estés <b>dentro de la Estancia (área EQE)</b>, tu ubicación y tu recorrido se comparten con la administración para organizar el trabajo de campo.</p><p class="small muted">Fuera de la estancia no se guarda nada. Al cerrar la app o tocar ✕ en la barra de ubicación, se deja de compartir.</p><div class="row" style="justify-content:flex-end"><button class="btn p" id="avOk">Entendido</button></div>`,()=>{$('#avOk').onclick=closeModal}),300)}}const b=$('#gpsBar');b.style.display='flex';$('#mapwrap').classList.add('gpson');
   b.innerHTML=`<div class="grow">${h}</div><div class="row" style="gap:4px;flex-wrap:nowrap">${G.pos&&!G.trk?`<button class="btn sm p" id="gpsTrk">🏃<span class="bl"> Recorrido</span></button>`:''}${G.pos&&!G.trk?`<button class="btn sm ${G.rec?'d':''} rol-dev nomob" id="gpsRec" title="Grabar el recorrido como camino">${G.rec?'⏹ Terminar camino':'⏺ Camino'}</button>`:''}<button class="btn sm" id="gpsFol">${G.follow?'🔒<span class="bl"> Siguiendo</span>':'🎯<span class="bl"> Centrar</span>'}</button><button class="btn sm" id="gpsX">✕</button></div>`;
   $('#gpsX').onclick=gpsStop;$('#gpsFol').onclick=()=>{G.follow=!G.follow;if(G.follow&&G.pos)map.setView([G.pos.lat,G.pos.lon],Math.max(map.getZoom(),16));gpsMsg(G.msg)};
   if($('#gpsRec'))$('#gpsRec').onclick=()=>G.rec?recStop(true):recStart();if($('#gpsTrk'))$('#gpsTrk').onclick=trkStart;trkPanel();setGh()}
@@ -3422,8 +3427,81 @@ async function sysPanel(){const box=$('#sysBox');if(!box)return;let u=null;if(St
     $('#syHr').innerHTML=L.length?`<div class="tbl" style="max-height:300px"><table><thead><tr><th>Fecha</th><th>Qué</th><th>Cambio</th><th></th></tr></thead><tbody>${L.map(h=>`<tr><td class="small">${new Date(h.at).toLocaleString('es-PY')}</td><td class="small" style="white-space:normal">${esc({lotes:'Lote',modulos:'Módulo',elems:'Elemento',potreros:'Potrero',config:'Parámetros',movs:'Movimiento',fotos:'Foto',tracks:'Recorrido'}[h.col]||h.col)}: ${esc(nm(h))}</td><td class="small">${h.op==='DELETE'?'🗑 Borrado':'✎ Versión anterior'}</td><td><button class="btn sm" data-hr="${h.hid}">↺ Recuperar</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="muted small">Nada encontrado.</div>';
     $('#syHr').querySelectorAll('[data-hr]').forEach(b=>b.onclick=()=>{const h=L.find(x=>String(x.hid)===b.dataset.hr);confirmBox('¿Volver este dato a como estaba en esa fecha?',async()=>{try{await Store.set(h.col,h.id,h.data);toast('✅ Recuperado')}catch(e){}})})}}
 
+// ================= personal en vivo y reportes =================
+const ST={u:{},q:[],lastSend:0,lastHist:0,lastPt:null,ly:null,trail:null,sel:null};
+const canSeeStaff=()=>Store.mode==='supa'&&['dev','encargado'].includes(S.rol);
+let EQEBOX=null;
+function inEQE(x,y,hit){if(hit)return true;if(!EQEBOX){let a=1e12,b=1e12,c=-1e12,d=-1e12;UL.forEach(u=>u.c.forEach(([px,py])=>{a=Math.min(a,px);b=Math.min(b,py);c=Math.max(c,px);d=Math.max(d,py)}));EQEBOX=[a-300,b-300,c+300,d+300]}
+  if(x<EQEBOX[0]||x>EQEBOX[2]||y<EQEBOX[1]||y>EQEBOX[3])return false;
+  return UL.some(u=>u.c.some(([px,py])=>Math.hypot(px-x,py-y)<400))}
+function shareOn(){return Store.mode==='supa'&&S.me&&S.rol&&S.rol!=='pendiente'&&Store.lsGet('compartir',true)!==false}
+async function liveShare(lat,lon,x,y,ac,spd,hit){if(!shareOn()||ac>80)return;if(!inEQE(x,y,hit)){ST.fuera=true;return}ST.fuera=false;
+  const now=Date.now(),lp=ST.lastPt,moved=lp?Math.hypot(x-lp[0],y-lp[1]):1e9;
+  const pot=hit?hit.id:null;
+  if(now-ST.lastHist>60000||moved>80||(pot&&pot!==ST.lastPot)){ST.lastHist=now;ST.lastPt=[x,y];ST.lastPot=pot;
+    ST.q.push({user_id:S.me.id,lat:+lat.toFixed(6),lon:+lon.toFixed(6),ac:Math.round(ac),spd:+(spd||0).toFixed(1),pot,at:new Date(now).toISOString()});Store.lsSet('ubq',ST.q.slice(-2000))}
+  if(now-ST.lastSend>25000||moved>40){ST.lastSend=now;
+    const row={user_id:S.me.id,nombre:S.me.nombre||S.me.email,rol:S.rol,lat:+lat.toFixed(6),lon:+lon.toFixed(6),ac:Math.round(ac),spd:+(spd||0).toFixed(1),pot,at:new Date(now).toISOString()};
+    if(navigator.onLine){try{await SB.from('ubic').upsert(row)}catch(e){}}ubicFlush()}}
+async function ubicFlush(){if(!navigator.onLine||!SB||!ST.q.length||ST._fl)return;ST._fl=1;try{while(ST.q.length){const b=ST.q.slice(0,200);const r=await SB.from('ubic_hist').insert(b);if(r.error)break;ST.q.splice(0,b.length);Store.lsSet('ubq',ST.q)}}catch(e){}ST._fl=0}
+setInterval(ubicFlush,60000);addEventListener('online',ubicFlush);
+async function staffInit(){ST.q=Store.lsGet('ubq',[]);ubicFlush();if(!canSeeStaff())return;
+  try{const r=await SB.from('ubic').select('*');(r.data||[]).forEach(u=>ST.u[u.user_id]=u)}catch(e){}
+  SB.channel('ubic-rt').on('postgres_changes',{event:'*',schema:'public',table:'ubic'},pl=>{const n=pl.new&&pl.new.user_id?pl.new:null;if(n)ST.u[n.user_id]=n;else if(pl.old&&pl.old.user_id)delete ST.u[pl.old.user_id];renderStaff();if(S.view==='personal')renderPersonal()}).subscribe();
+  renderStaff();setInterval(renderStaff,60000)}
+const hace=t=>{const m=Math.round((Date.now()-new Date(t))/60000);return m<1?'ahora':m<60?`hace ${m} min`:m<1440?`hace ${Math.floor(m/60)} h ${m%60} min`:`hace ${Math.floor(m/1440)} d`};
+const staffCol=id=>{let h=0;for(const c of String(id))h=(h*31+c.charCodeAt(0))>>>0;return['#e91e63','#3f51b5','#009688','#ff5722','#9c27b0','#2196f3','#795548','#607d8b','#cddc39','#00bcd4'][h%10]};
+const inic=n=>String(n||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+function renderStaff(){if(!map||!canSeeStaff())return;if(!ST.ly)ST.ly=L.layerGroup().addTo(map);ST.ly.clearLayers();if(S.hide.staff)return;
+  Object.values(ST.u).forEach(u=>{if(S.me&&u.user_id===S.me.id&&G.mk)return;const min=(Date.now()-new Date(u.at))/60000;if(min>12*60)return;const live=min<10;const col=staffCol(u.user_id);
+    const mk=L.marker([u.lat,u.lon],{zIndexOffset:1500,icon:L.divIcon({className:'',iconSize:[0,0],html:`<div class="stf${live?' live':''}" style="--c:${live?col:'#9e9e9e'}"><b>${esc(inic(u.nombre))}</b><span>${esc((u.nombre||'').split(' ')[0])} · ${live?'en vivo':hace(u.at)}</span></div>`})});
+    mk.on('click',()=>{showView('personal');verPersonal(u.user_id,todayS())});mk.addTo(ST.ly)})}
+// ---- vista Personal ----
+let PD=todayS();
+async function renderPersonal(){const box=$('#perBox');if(!canSeeStaff()){box.innerHTML='<div class="empty">Disponible para el desarrollador y los encargados, con la base compartida.</div>';return}
+  const r=await SB.from('profiles').select('id,nombre,email,rol').neq('rol','pendiente');const us=r.data||[];
+  const d0=new Date(PD+'T00:00:00'),d1=new Date(d0.getTime()+864e5);
+  const h=await SB.from('ubic_hist').select('user_id,lat,lon,pot,at,spd').gte('at',d0.toISOString()).lt('at',d1.toISOString()).order('at').limit(20000);const pts=h.data||[];
+  const by={};pts.forEach(p=>(by[p.user_id]=by[p.user_id]||[]).push(p));
+  const trk=Object.values(S.trk||{}).filter(t=>t.fecha===PD);
+  const rows=us.map(u=>{const P=by[u.id]||[],live=ST.u[u.id];const s=resumenDia(P);const tr=trk.filter(t=>t.by===(u.nombre||''));return{u,P,live,s,tr}}).sort((a,b)=>(b.P.length>0)-(a.P.length>0)||String(a.u.nombre).localeCompare(b.u.nombre));
+  box.innerHTML=`<div class="card"><h2>👥 Personal en la estancia</h2><p class="small muted">Se registra la ubicación de cada persona mientras tiene la app abierta con 📍 activado y está <b>dentro del área de EQE</b>. Afuera no se guarda nada.</p>
+  <div class="row"><label class="f">Día<input type="date" id="pdDia" value="${PD}" max="${todayS()}"></label><button class="btn sm" id="pdHoy" style="align-self:flex-end">Hoy</button><button class="btn sm" id="pdXl" style="align-self:flex-end">⬇ Excel del día</button></div>
+  <div class="tbl" style="margin-top:10px"><table><thead><tr><th>Persona</th><th>Ahora</th><th>Salió al campo</th><th>Última vez</th><th class="n">Horas en campo</th><th class="n">Km</th><th class="n">Potreros</th><th class="n">Recorridos</th></tr></thead><tbody>
+  ${rows.map(({u,P,live,s,tr})=>`<tr class="click" data-pu="${u.id}"><td><span class="prodsem" style="background:${staffCol(u.id)}"></span><b>${esc(u.nombre||u.email)}</b><div class="small muted">${esc(ROLN[u.rol]||u.rol)}</div></td>
+   <td class="small">${live?((Date.now()-new Date(live.at))<6e5?'🟢 En vivo':'⚪ '+hace(live.at))+(live.pot?'<br>en '+esc(live.pot):''):'–'}</td><td>${s?s.ini:'–'}</td><td>${s?s.fin:'–'}</td><td class="n">${s?s.horas:'–'}</td><td class="n">${s?fmt(s.km,1):'–'}</td><td class="n">${s?s.pots.length:'–'}</td><td class="n">${tr.length||'–'}</td></tr>`).join('')}</tbody></table></div>
+  <p class="small muted">Tocá una persona para ver su recorrido del día en el mapa, la hora en que entró a cada potrero y repetirlo.</p></div>`;
+  $('#pdDia').onchange=e=>{PD=e.target.value||todayS();renderPersonal()};$('#pdHoy').onclick=()=>{PD=todayS();renderPersonal()};
+  box.querySelectorAll('[data-pu]').forEach(tr=>tr.onclick=()=>verPersonal(tr.dataset.pu,PD));
+  $('#pdXl').onclick=()=>{if(!window.XLSX)return;const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows.map(({u,s,tr})=>({Persona:u.nombre||u.email,Rol:ROLN[u.rol]||u.rol,'Salió al campo':s?s.ini:'','Última vez':s?s.fin:'','Horas en campo':s?s.horas:'',Km:s?+s.km.toFixed(1):'','Potreros visitados':s?s.pots.map(p=>p.pot+' '+p.hora).join(', '):'',Recorridos:tr.length}))),'Personal '+PD);
+    XLSX.writeFile(wb,`Queenie_personal_${PD}.xlsx`)}}
+function resumenDia(P){if(!P||!P.length)return null;let km=0;for(let i=1;i<P.length;i++){const a=ll2utm(P[i-1].lat,P[i-1].lon),b=ll2utm(P[i].lat,P[i].lon),d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(d<3000)km+=d/1000}
+  const hh=t=>new Date(t).toTimeString().slice(0,5);const pots=[];P.forEach(p=>{if(p.pot&&(!pots.length||pots[pots.length-1].pot!==p.pot))pots.push({pot:p.pot,hora:hh(p.at)})});
+  const ms=new Date(P[P.length-1].at)-new Date(P[0].at);return{ini:hh(P[0].at),fin:hh(P[P.length-1].at),horas:`${Math.floor(ms/36e5)} h ${Math.round(ms%36e5/6e4)} min`,km,pots}}
+async function verPersonal(uid,dia){const r=await SB.from('profiles').select('nombre,email,rol').eq('id',uid).single();const u=r.data||{};
+  const d0=new Date(dia+'T00:00:00'),d1=new Date(d0.getTime()+864e5);const h=await SB.from('ubic_hist').select('lat,lon,pot,at,spd').eq('user_id',uid).gte('at',d0.toISOString()).lt('at',d1.toISOString()).order('at').limit(20000);
+  const P=h.data||[];const s=resumenDia(P);const live=ST.u[uid];
+  showView('mapa');if(ST.trail)ST.trail.remove();ST.trail=L.layerGroup().addTo(map);const col=staffCol(uid);
+  if(P.length){const ll=P.map(p=>[p.lat,p.lon]);L.polyline(ll,{color:'#000',weight:8,opacity:.35,interactive:false}).addTo(ST.trail);L.polyline(ll,{color:col,weight:4.5,opacity:1}).addTo(ST.trail);
+    L.circleMarker(ll[0],{radius:7,color:'#fff',weight:2,fillColor:'#2e7d32',fillOpacity:1}).bindTooltip('Entró '+s.ini).addTo(ST.trail);L.circleMarker(ll[ll.length-1],{radius:7,color:'#fff',weight:2,fillColor:'#c62828',fillOpacity:1}).bindTooltip('Última '+s.fin).addTo(ST.trail);
+    map.fitBounds(L.latLngBounds(ll).pad(.2))}else if(live)map.setView([live.lat,live.lon],15);
+  sheet('mid');const el=$('#side');
+  el.innerHTML=`<div class="row" style="justify-content:space-between"><h2 style="margin:0"><span class="prodsem" style="background:${col}"></span>${esc(u.nombre||u.email||'')}</h2><button class="btn sm" id="pvX">✕</button></div>
+  <div class="small muted">${esc(ROLN[u.rol]||'')} · ${dFmt(dia)} ${live?' · '+((Date.now()-new Date(live.at))<6e5?'🟢 en vivo':'visto '+hace(live.at))+(live.pot?' en '+esc(live.pot):''):''}</div>
+  <div class="row" style="margin:8px 0"><input type="date" id="pvD" value="${dia}" max="${todayS()}"><button class="btn sm p" id="pvP" ${P.length?'':'disabled'}>▶ Repetir recorrido</button>${live?'<button class="btn sm" id="pvL">📍 Dónde está</button>':''}</div>
+  ${s?`<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div class="stat"><b>${s.ini}</b><span>Salió al campo</span></div><div class="stat"><b>${s.fin}</b><span>Última vez</span></div><div class="stat"><b>${s.horas}</b><span>En campo</span></div><div class="stat"><b>${fmt(s.km,1)}</b><span>km</span></div></div>
+  <h3>Potreros por donde pasó</h3>${s.pots.length?`<div class="tbl"><table><tbody>${s.pots.map(p=>`<tr class="click" data-gp="${esc(p.pot)}"><td>${p.hora}</td><td><b>${esc(p.pot)}</b></td></tr>`).join('')}</tbody></table></div>`:'<div class="muted small">Anduvo por caminos o fuera de los potreros.</div>'}`
+  :'<div class="empty">Sin registros ese día dentro de EQE.</div>'}`;
+  $('#pvX').onclick=()=>{if(ST.trail){ST.trail.remove();ST.trail=null}clearSel()};$('#pvD').onchange=e=>verPersonal(uid,e.target.value||todayS());
+  if($('#pvL'))$('#pvL').onclick=()=>map.setView([live.lat,live.lon],16);
+  el.querySelectorAll('[data-gp]').forEach(a=>a.onclick=()=>selectPot(a.dataset.gp));
+  $('#pvP').onclick=()=>{if(!P.length)return;sheet('min');const ll=P.map(p=>[p.lat,p.lon]);let i=0;const mk=L.circleMarker(ll[0],{radius:9,color:'#fff',weight:3,fillColor:col,fillOpacity:1}).addTo(ST.trail);const step=Math.max(1,Math.floor(ll.length/250));
+    const tip=L.tooltip({permanent:true,direction:'top',offset:[0,-10]}).setLatLng(ll[0]).addTo(ST.trail);
+    const iv=setInterval(()=>{i+=step;if(i>=ll.length){clearInterval(iv);i=ll.length-1}mk.setLatLng(ll[i]);tip.setLatLng(ll[i]).setContent(new Date(P[i].at).toTimeString().slice(0,5)+(P[i].pot?' · '+P[i].pot:''));if(!map.getBounds().pad(-.1).contains(ll[i]))map.panTo(ll[i])},45)}}
+
 // ================= routing =================
-const VIEWS=['mapa','potreros','hacienda','proy','prod','3d','agro','cfg','usr','sys'];
+const VIEWS=['mapa','potreros','hacienda','proy','prod','3d','agro','personal','cfg','usr','sys'];
 function showView(v){if(!VIEWS.includes(v)||(v==='sys'&&!can('*')))v='mapa';document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.v===v));document.querySelectorAll('.view').forEach(s=>s.classList.toggle('on',s.id==='v-'+v));S.view=v;try{if(location.hash!=='#'+v)history.replaceState(null,'','#'+v)}catch{}renderView(true);if(v==='mapa'&&map)setTimeout(()=>map.invalidateSize(),50)}
 document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>showView(b.dataset.v));
 window.addEventListener('hashchange',()=>showView(location.hash.slice(1)));
@@ -3435,6 +3513,7 @@ function renderView(force){const v=S.view||'mapa';
   else if(v==='cfg'){if(force||!editing('#cfgBox'))renderCfg()}
   else if(v==='usr'){if(force)renderUsers()}
   else if(v==='sys'){if(force)sysPanel()}
+  else if(v==='personal'){if(force)renderPersonal()}
   else if(v==='prod'){if(force||!editing('#prodBox'))renderProd()}
   else if(v==='3d'){render3d(force)}}
 function calcAll(){potCalcCache={};modCalcCache={};UL.forEach(p=>potCalcCache[p.id]=potCalc(p.id));ML.forEach(m=>modCalcCache[m.id]=modCalc(m.id))}
