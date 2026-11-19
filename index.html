@@ -999,7 +999,20 @@ body[data-rol=campo] .rol-enc,body[data-rol=campo] .rol-dev,body[data-rol=encarg
 .fgal{display:grid;grid-template-columns:repeat(auto-fill,minmax(82px,1fr));gap:6px;margin-bottom:8px}.fth{position:relative;aspect-ratio:1;border-radius:8px;overflow:hidden;background:#e8ece8;cursor:pointer}.fth img{width:100%;height:100%;object-fit:cover;display:block}.fth span{position:absolute;left:0;right:0;bottom:0;background:rgba(0,0,0,.55);color:#fff;font-size:10px;text-align:center;padding:1px}
 .fadd{aspect-ratio:1;border:2px dashed #b9c6bb;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;font-size:22px;color:var(--pri);text-align:center}.fadd span{font-size:10.5px;font-weight:600;line-height:1.1;padding:0 3px}
 .trkst{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center}.trkst b{display:block;font-size:17px}.trkst span{font-size:10px;color:var(--mut);text-transform:uppercase}
-#v-3d.on{display:block;position:relative}#map3d{position:absolute;inset:0}#ctl3d{position:absolute;top:10px;left:10px;z-index:5;max-width:260px}
+#v-3d.on{display:block;position:relative;background:#0d1310}#map3d{position:absolute;inset:0}#ctl3d{position:absolute;inset:0;pointer-events:none;z-index:5}
+.g3{background:rgba(14,20,17,.78);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);color:#e6ede8;border:1px solid rgba(255,255,255,.08);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.35);pointer-events:auto}
+.g3.top{position:absolute;top:14px;left:14px;width:310px;padding:14px;animation:in3 .7s ease both}
+.t3{font-weight:700;font-size:15px;letter-spacing:.3px;margin-bottom:6px}.t3 span{font-weight:400;opacity:.45}
+.l3{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;opacity:.5;margin:10px 0 5px}
+.seg{display:flex;background:rgba(255,255,255,.06);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap}.seg button{flex:1;border:0;background:transparent;color:#cfd8d0;font-size:11.5px;padding:6px;border-radius:7px;cursor:pointer;transition:background .25s,color .25s;white-space:nowrap}.seg button.on{background:#e6ede8;color:#0d1310;font-weight:700}
+.row3{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}.b3{border:1px solid rgba(255,255,255,.14);background:transparent;color:#e6ede8;border-radius:8px;padding:6px 10px;font-size:12px;cursor:pointer;transition:.2s}.b3:hover{background:rgba(255,255,255,.08)}.b3.on{background:#3fbf7f;border-color:#3fbf7f;color:#0d1310;font-weight:700}
+.lgw{margin-top:10px;display:flex;flex-wrap:wrap;gap:8px}.lg{font-size:11px;opacity:.85;display:flex;align-items:center;gap:5px}.lg i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.kpi3{position:absolute;bottom:18px;left:50%;transform:translateX(-50%);display:flex;padding:10px 4px;animation:in3b .8s .2s ease both}.kpi3>div{padding:0 18px;text-align:center;border-right:1px solid rgba(255,255,255,.08)}.kpi3>div:last-child{border:0}.kpi3 b{display:block;font-size:20px;font-weight:700}.kpi3 span{font-size:10px;text-transform:uppercase;letter-spacing:1px;opacity:.55;white-space:nowrap}.kpi3 .r b{color:#ef5a50}
+.card3{position:absolute;top:14px;right:14px;width:270px;padding:14px;animation:in3 .4s ease both}.sub3{font-size:12px;opacity:.72;margin:4px 0}.k3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:10px 0}.k3 b{display:block;font-size:17px}.k3 span{font-size:10px;opacity:.55;text-transform:uppercase}
+#m3tip{position:absolute;display:none;pointer-events:none;background:rgba(14,20,17,.92);color:#e6ede8;padding:6px 9px;border-radius:8px;font-size:12px;line-height:1.4;border:1px solid rgba(255,255,255,.1)}
+#v-3d .maplibregl-ctrl-group{background:rgba(14,20,17,.8);border:1px solid rgba(255,255,255,.1)}#v-3d .maplibregl-ctrl-group button+button{border-top-color:rgba(255,255,255,.1)}#v-3d .maplibregl-ctrl-icon{filter:invert(1)}#v-3d .maplibregl-ctrl-bottom-right{bottom:84px}
+@keyframes in3{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}@keyframes in3b{from{opacity:0;transform:translate(-50%,12px)}to{opacity:1;transform:translate(-50%,0)}}
+@media(max-width:700px){.g3.top{left:8px;right:8px;width:auto;top:8px;padding:10px}.g3.top .opt3,.g3.top .lgw{display:none}.g3.top .t3{font-size:13px}.seg button{padding:5px 4px;font-size:11px}.kpi3{bottom:8px;width:calc(100% - 16px);justify-content:space-around;padding:8px 0}.kpi3>div{padding:0 4px}.kpi3 b{font-size:15px}.kpi3 span{font-size:8.5px;letter-spacing:.3px;white-space:normal}.card3{top:auto;bottom:78px;left:8px;right:8px;width:auto}#v-3d .maplibregl-ctrl-bottom-right{bottom:150px}}
 .prodsem{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px}.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .tcard{border:1px solid var(--line);border-radius:10px;padding:10px;margin-bottom:10px}
 .tcard .row>input,.tcard .row>select{width:auto}
@@ -1045,7 +1058,7 @@ input,select,textarea{font-size:16px}.btn{padding:9px 12px}.btn.sm{padding:7px 1
   <section class="view" id="v-hacienda"><div class="scroll" id="haciendaBox"></div></section>
   <section class="view" id="v-proy"><div class="scroll" id="proyBox"></div></section>
   <section class="view" id="v-prod"><div class="scroll" id="prodBox"></div></section>
-  <section class="view" id="v-3d"><div id="map3d"></div><div id="ctl3d" class="mapctl"></div></section>
+  <section class="view" id="v-3d"><div id="map3d"></div><div id="ctl3d"></div></section>
   <section class="view" id="v-agro"><div class="scroll" id="agroBox"></div></section>
   <section class="view" id="v-cfg"><div class="scroll" id="cfgBox"></div></section>
   <section class="view" id="v-usr"><div class="scroll" id="usrBox"></div></section>
@@ -2147,7 +2160,7 @@ function renderLyrCtl(){const d=$('#lyrctl');if(!d||d.contains(document.activeEl
   const tipos=S.cfg.tipos.filter(t=>Object.values(S.el).some(e=>e.tipo===t.k));
   if(S.lyrOpen==null)S.lyrOpen=innerWidth>900;
   d.innerHTML=`<details id="lyrDet" ${S.lyrOpen?'open':''}><summary style="cursor:pointer;font-weight:700">🗂️ Capas y colores</summary><b>Colorear por</b><br><select id="cmode">${[['mod','Semáforo de módulos'],['modc','Módulos (color de cada uno)'],['sector','Sectores (cada módulo en otro tono)'],['sem','Semáforo de cada potrero'],['past','Tipo de pastura'],['carga','Carga vs receptividad'],['proy','Días al peso objetivo'],['cat','Categoría principal'],['clase','Clase (potrero/corral)']].map(([v,t])=>`<option value="${v}" ${S.colorMode===v?'selected':''}>${t}</option>`).join('')}</select>
-  <label><input type="checkbox" data-h="lbl" ${S.hide.lbl?'':'checked'}> Etiquetas</label><label><input type="checkbox" data-h="herd" ${S.hide.herd?'':'checked'}> 🐄 Carteles de módulos y hacienda</label><label><input type="checkbox" data-h="beb" ${S.hide.beb?'':'checked'}> 💧 Bebederos mapa 2023</label>
+  <label><input type="checkbox" data-h="lbl" ${S.hide.lbl?'':'checked'}> Etiquetas</label><label><input type="checkbox" data-h="herd" ${S.hide.herd?'':'checked'}> 🐄 Carteles de módulos y hacienda</label>${Object.values(S.el).some(e=>e.tipo==='bebe')?'':`<label><input type="checkbox" data-h="beb" ${S.hide.beb?'':'checked'}> 💧 Bebederos mapa 2023</label>`}
   <label><input type="checkbox" data-h="sb" ${S.hide.sb?'':'checked'}> ┅ Límite de sectores</label><label><input type="checkbox" data-h="mo" ${S.hide.mo?'':'checked'}> ▭ Contorno de módulos</label>
   ${tipos.map(t=>`<label><input type="checkbox" data-h="t_${t.k}" ${S.hide['t_'+t.k]?'':'checked'}> ${t.ic} ${esc(t.n)}</label>${t.k==='camino'?[...new Set(Object.values(S.el).filter(e=>e.tipo==='camino').map(e=>(e.f||{}).Tipo||'Principal'))].map(r=>`<label style="margin-left:18px"><input type="checkbox" data-h="rd_${esc(r)}" ${S.hide['rd_'+r]?'':'checked'}> ${esc(r)}</label>`).join(''):''}`).join('')}
   <div style="margin-top:6px"><b>Mostrar</b></div>${[...new Set(UL.map(u=>u.clase))].map(c=>`<label><input type="checkbox" data-h="cl_${esc(c)}" ${S.hide['cl_'+c]?'':'checked'}> ${esc(c)}s</label>`).join('')}
@@ -2698,7 +2711,10 @@ async function importPlanillaRows(rows,params,opt){opt=opt||{};let nm=0,nl=0,ski
     await Store.set('lotes',lk,{...old,mod:id,pot:old.pot&&pots.includes(old.pot)?old.pot:'',cat,cab,peso,fpeso,fing:old.fing||ing||fpeso,gmdPlan:r.gmd===''||r.gmd==null?(old.gmdPlan??null):+r.gmd,imp:true,obs:String(r.obs||old.obs||''),pesajes:same?(old.pesajes||[]):[...(old.pesajes||[]),...(old.peso?[{f:old.fpeso,peso:old.peso,cab:old.cab}]:[])].slice(-30),ts:Date.now()});nl++}
   return{nm,nl,skip,warn}}
 let _seeding=false;
-async function autoSeed(){if(_seeding)return;try{const needM=!Object.keys(S.mod).length,needL=!Object.values(S.lotes).some(l=>l.mod);
+async function seedBeb(){try{if(!can('*')||S.cfg.bebSeeded||Object.values(S.el).some(e=>e.origen==='mapa2023'))return;S.cfg.bebSeeded=true;
+  for(let i=0;i<BEB_LL.length;i++)await Store.set('elems','beb'+(i+1),{tipo:'bebe',nombre:'Bebedero '+(i+1),g:{t:'pt',c:[BEB_LL[i]]},f:{Tipo:'Bebedero',Estado:'Funciona'},origen:'mapa2023',upd:new Date().toISOString()});
+  await Store.set('config','main',{...clone(S.cfg),bebSeeded:true});toast(`💧 ${BEB_LL.length} bebederos pasados a editables`)}catch(e){console.warn(e)}}
+async function autoSeed(){if(_seeding)return;setTimeout(seedBeb,1500);try{const needM=!Object.keys(S.mod).length,needL=!Object.values(S.lotes).some(l=>l.mod);
   if(!needM&&!needL)return;if(Store.mode==='local'&&Store.lsGet('seeded2',false)&&!needM)return;_seeding=true;
   const r=await importPlanillaRows(SEED.rows,SEED.params,{lotes:needL});Store.lsSet('seeded2',true);toast(`Módulos precargados: ${r.nm}${needL?` · ${r.nl} lotes de la planilla`:''}`)}catch(e){console.warn(e)}finally{_seeding=false}}
 // ================= unit rename/delete =================
@@ -3173,35 +3189,89 @@ function renderProd(){const box=$('#prodBox'),c=S.cfg;if(!prodDesde)prodDesde=dA
     XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(agri.map(a=>({Lote:a.e.nombre||'',Cultivo:a.f.Cultivo||'',ha:+a.ha.toFixed(1),'Esperado kg':Math.round(a.esp),'Cosecha real kg':a.kg,'Costo Gs':a.cost,'Gs/kg':a.kg&&a.cost?+(a.cost/a.kg).toFixed(1):''}))),'Agricultura');
     XLSX.writeFile(wb,`Queenie_produccion_${prodDesde}_${hasta}.xlsx`)}}
 // ================= vista 3D =================
-let M3=null,m3metric='cab',m3color='sem';
+let M3=null;const m3={metric:'cab',color:null,base:'min',spin:true,k:0,hov:null,sel:null,raf:0,pulse:0,touched:0};
+const M3SEM={verde:'#3fbf7f',amarillo:'#e9c046',rojo:'#ef5a50',gris:'#5f6b66'};
+const M3MET=[['cab','Cabezas'],['kg','Kg producidos'],['carga','Carga'],['sem','Semáforo'],['ha','Superficie']];
+const M3COL=[['sem','Semáforo'],['mod','Módulos'],['past','Pastura']];
+const M3BASE=[['min','Minimal'],['soft','Satélite suave'],['sat','Satélite']];
 function loadML(){return new Promise((ok,ko)=>{if(window.maplibregl)return ok();const css=document.createElement('link');css.rel='stylesheet';css.href=MAPLIBRE_CSS;document.head.appendChild(css);
   const s=document.createElement('script');s.src=MAPLIBRE_JS;s.onload=ok;s.onerror=ko;document.head.appendChild(s)})}
-function geo3d(){const R=prodCalc(dAdd(todayS(),-30));const kgOf={};R.forEach(r=>{if(r.isM)MOD[r.id].pots.forEach(p=>{if(POT[p])kgOf[p]=(r.kg*(POT[p].ha/(r.ha||1)))});else kgOf[r.id]=r.kg});
-  const feats=UL.filter(u=>unitVisible?unitVisible(u):true).map(u=>{const pc=potCalcCache[u.id],md=POTMOD[u.id],mc=md?modCalcCache[md]:null;
-    const sem=mc?mc.sem:pc.sem;let v=0;
-    if(m3metric==='cab')v=mc&&!pc.cab?0:pc.cab;else if(m3metric==='carga')v=(mc?mc.carga:pc.carga)*300;else if(m3metric==='kg')v=(kgOf[u.id]||0)/Math.max(1,u.ha)*20;else if(m3metric==='sem')v={verde:320,amarillo:200,rojo:90,gris:30}[sem];else if(m3metric==='ha')v=u.ha*2;
-    const col=m3color==='sem'?SEMC[sem]:m3color==='mod'?(md?modColor(MOD[md]):'#cfd8dc'):(pastCfg(pc.d.past).col||'#9e9e9e');
-    return{type:'Feature',properties:{id:u.id,h:Math.max(4,v),col,cab:pc.cab||0,sem:SEML[sem],mod:md?MOD[md].nombre:'',ha:u.ha},geometry:{type:'Polygon',coordinates:[u.ll.map(([a,b])=>[b,a])]}}});
-  const lines=Object.entries(S.el).filter(([k,e])=>e.g&&e.g.t==='line').map(([k,e])=>{const st=elStyle(e);return{type:'Feature',properties:{col:st.col,w:Math.max(2,st.w/1.5)},geometry:{type:'LineString',coordinates:e.g.c.map(([a,b])=>[b,a])}}});
-  const edif=Object.entries(S.el).filter(([k,e])=>e.g&&e.g.t==='pol'&&['edif','plant','monte'].includes(e.tipo)).map(([k,e])=>({type:'Feature',properties:{h:e.tipo==='edif'?8:e.tipo==='plant'?18:22,col:tipoOf(e.tipo).col},geometry:{type:'Polygon',coordinates:[e.g.c.map(([a,b])=>[b,a])]}}));
-  return{pot:{type:'FeatureCollection',features:feats},lin:{type:'FeatureCollection',features:lines},edif:{type:'FeatureCollection',features:edif}}}
-async function render3d(force){const ctl=$('#ctl3d');
-  ctl.innerHTML=`<b>🧊 Vista 3D</b><div class="small muted">Arrastrá con dos dedos (o clic derecho) para inclinar y girar.</div><label class="f" style="margin-top:6px">Altura según<select id="m3m">${[['cab','Cabezas'],['kg','Kg producidos/ha (30 d)'],['carga','Carga UA/ha'],['sem','Semáforo'],['ha','Superficie']].map(([v,t])=>`<option value="${v}" ${m3metric===v?'selected':''}>${t}</option>`).join('')}</select></label>
-  <label class="f" style="margin-top:6px">Color según<select id="m3c">${[['sem','Semáforo'],['mod','Módulo'],['past','Pastura']].map(([v,t])=>`<option value="${v}" ${m3color===v?'selected':''}>${t}</option>`).join('')}</select></label>`;
-  $('#m3m').onchange=e=>{m3metric=e.target.value;upd3d()};$('#m3c').onchange=e=>{m3color=e.target.value;upd3d()};
-  try{await loadML()}catch(e){$('#map3d').innerHTML='<div class="empty">No se pudo cargar el motor 3D (sin internet).</div>';return}
-  if(M3){M3.resize();upd3d();return}
+const lighten=(h,a)=>{const n=parseInt(h.slice(1),16),r=n>>16,g=n>>8&255,b=n&255,f=x=>Math.round(x+(255-x)*a);return'#'+((1<<24)|(f(r)<<16)|(f(g)<<8)|f(b)).toString(16).slice(1)};
+function cab3d(){const o={};UL.forEach(u=>o[u.id]=potCalcCache[u.id].cab||0);Object.values(S.lotes).forEach(l=>{if(!validLote(l)||(l.pot&&POT[l.pot])||!l.mod||!MOD[l.mod])return;const ps=MOD[l.mod].pots.filter(p=>POT[p]),ha=ps.reduce((s,p)=>s+POT[p].ha,0)||1;ps.forEach(p=>o[p]+=(+l.cab||0)*POT[p].ha/ha)});return o}
+function geo3d(){if(!m3.color)m3.color=UL.some(u=>potCalcCache[u.id].sem!=='gris')?'sem':'mod';const CB=cab3d();const R=prodCalc(dAdd(todayS(),-30));const kgOf={};R.forEach(r=>{if(r.isM)MOD[r.id].pots.forEach(p=>{if(POT[p])kgOf[p]=r.kg*(POT[p].ha/(r.ha||1))});else kgOf[r.id]=r.kg});
+  const raw=UL.map(u=>{const pc=potCalcCache[u.id],md=POTMOD[u.id],mc=md?modCalcCache[md]:null,sem=mc?mc.sem:pc.sem;let v=0;
+    if(m3.metric==='cab')v=CB[u.id];else if(m3.metric==='carga')v=mc?mc.carga:pc.carga;else if(m3.metric==='kg')v=(kgOf[u.id]||0)/Math.max(1,u.ha);else if(m3.metric==='sem')v={verde:3,amarillo:2,rojo:1,gris:.35}[sem];else v=u.ha;
+    const col=m3.color==='sem'?M3SEM[sem]:m3.color==='mod'?(md?modColor(MOD[md]):'#4a5550'):(pastCfg(pc.d.past).col||'#5f6b66');return{u,pc,md,sem,v,col}});
+  const mx=Math.max(1e-6,...raw.map(r=>r.v));
+  const feats=raw.map((r,i)=>({type:'Feature',id:i,properties:{id:r.u.id,h:r.v>0?18+r.v/mx*620:6,col:r.col,colH:lighten(r.col,.45),cab:Math.round(CB[r.u.id]),sem:r.sem,semL:SEML[r.sem],mod:r.md?MOD[r.md].sector+' · '+MOD[r.md].nombre:'',ha:r.u.ha,v:r.v,past:r.pc.d.past||''},geometry:{type:'Polygon',coordinates:[r.u.ll.map(([a,b])=>[b,a])]}}));
+  const lines=Object.entries(S.el).filter(([k,e])=>e.g&&e.g.t==='line'&&['camino','silo','agua'].includes(e.tipo)).map(([k,e])=>{const st=elStyle(e);return{type:'Feature',properties:{col:e.tipo==='camino'?'#d8cbb0':st.col,w:e.tipo==='silo'?4:e.tipo==='camino'&&(e.f||{}).Tipo==='Principal'?2.6:1.4},geometry:{type:'LineString',coordinates:e.g.c.map(([a,b])=>[b,a])}}});
+  const edif=Object.entries(S.el).filter(([k,e])=>e.g&&e.g.t==='pol'&&['edif','plant','monte'].includes(e.tipo)).map(([k,e])=>({type:'Feature',properties:{h:e.tipo==='edif'?14:e.tipo==='plant'?40:55,col:e.tipo==='edif'?'#cfd8dc':'#2f5d3a'},geometry:{type:'Polygon',coordinates:[e.g.c.map(([a,b])=>[b,a])]}}));
+  const pts=Object.entries(S.el).filter(([k,e])=>e.g&&e.g.t==='pt'&&['bebe','batea','infra'].includes(e.tipo)).map(([k,e])=>({type:'Feature',properties:{col:e.tipo==='bebe'?'#4fc3f7':e.tipo==='batea'?'#ffb74d':'#eceff1'},geometry:{type:'Point',coordinates:[e.g.c[0][1],e.g.c[0][0]]}}));
+  return{pot:{type:'FeatureCollection',features:feats},lin:{type:'FeatureCollection',features:lines},edif:{type:'FeatureCollection',features:edif},pts:{type:'FeatureCollection',features:pts},mx}}
+function m3Legend(g){if(m3.color==='sem')return Object.entries(M3SEM).map(([k,c])=>`<span class="lg"><i style="background:${c}"></i>${SEML[k]}</span>`).join('');
+  if(m3.color==='past'){const ps=[...new Set(UL.map(u=>potCalcCache[u.id].d.past).filter(Boolean))];return ps.length?ps.map(p=>`<span class="lg"><i style="background:${pastCfg(p).col}"></i>${esc(p)}</span>`).join(''):'<span class="lg">Sin pasturas cargadas</span>'}
+  return '<span class="lg">Cada módulo con su color</span>'}
+function m3Ui(){if(!m3.color)m3.color=UL.some(u=>potCalcCache[u.id].sem!=='gris')?'sem':'mod';const box=$('#ctl3d');const tot=Object.values(S.lotes).filter(validLote).reduce((s,l)=>s+(+l.cab||0),0),crit=ML.filter(m=>modCalcCache[m.id]&&modCalcCache[m.id].sem==='rojo').length,act=ML.filter(m=>modCalcCache[m.id]&&modCalcCache[m.id].cab).length;
+  const kg=prodCalc(dAdd(todayS(),-30)).reduce((s,r)=>s+r.kg,0);const seg=(arr,cur,key)=>`<div class="seg">${arr.map(([v,t])=>`<button data-${key}="${v}" class="${cur===v?'on':''}">${t}</button>`).join('')}</div>`;
+  box.innerHTML=`<div class="g3 top"><div class="t3">Estancia Queenie <span>3D</span></div>
+   <div class="l3">Altura</div>${seg(M3MET,m3.metric,'mm')}<div class="l3">Color</div>${seg(M3COL,m3.color,'mc')}<div class="l3 opt3">Fondo</div><div class="opt3">${seg(M3BASE,m3.base,'mb')}</div>
+   <div class="row3"><button class="b3 ${m3.spin?'on':''}" id="m3spin">${m3.spin?'⏸ Girando':'⟳ Girar'}</button><button class="b3" id="m3home">⌂ Vista general</button><button class="b3" id="m3top">⬒ Desde arriba</button></div>
+   <div class="lgw">${m3Legend()}</div></div>
+   <div class="g3 kpi3"><div><b data-cnt="${tot}">0</b><span>cabezas</span></div><div><b data-cnt="${act}">0</b><span>módulos con hacienda</span></div><div><b data-cnt="${Math.round(kg)}">0</b><span>kg producidos · 30 d</span></div><div class="${crit?'r':''}"><b data-cnt="${crit}">0</b><span>módulos críticos</span></div></div>
+   <div class="g3 card3" id="m3card" style="display:none"></div><div id="m3tip"></div>`;
+  box.querySelectorAll('[data-cnt]').forEach(b=>{const to=+b.dataset.cnt,t0=performance.now();const f=t=>{const p=Math.min(1,(t-t0)/1100),e=1-Math.pow(1-p,3);b.textContent=fmt(to*e);if(p<1)requestAnimationFrame(f)};requestAnimationFrame(f)});
+  box.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{m3.metric=b.dataset.mm;m3Regrow()});
+  box.querySelectorAll('[data-mc]').forEach(b=>b.onclick=()=>{m3.color=b.dataset.mc;upd3d();m3Ui()});
+  box.querySelectorAll('[data-mb]').forEach(b=>b.onclick=()=>{m3.base=b.dataset.mb;m3Base();m3Ui()});
+  $('#m3spin').onclick=()=>{m3.spin=!m3.spin;m3.touched=0;m3Ui()};$('#m3home').onclick=()=>m3Home(1800);$('#m3top').onclick=()=>M3&&M3.easeTo({pitch:0,bearing:0,duration:1400});
+  if(m3.sel!=null)m3Card(m3.sel)}
+function m3Base(){if(!M3||!M3.getLayer('sat'))return;const b=m3.base;M3.setLayoutProperty('sat','visibility',b==='min'?'none':'visible');
+  M3.setPaintProperty('sat','raster-saturation',b==='soft'?-.85:0);M3.setPaintProperty('sat','raster-brightness-max',b==='soft'?.55:1);M3.setPaintProperty('sat','raster-contrast',b==='soft'?-.15:0)}
+function m3Home(d){if(!M3)return;const b=L.latLngBounds(Object.values(BASE).flatMap(x=>x.ll));M3.flyTo({center:[b.getCenter().lng,b.getCenter().lat],zoom:innerWidth<700?10.8:12.2,pitch:58,bearing:-28,duration:d||2400,essential:true})}
+function m3Anim(from,to,ms,done){const t0=performance.now();cancelAnimationFrame(m3._ga);const f=t=>{const p=Math.min(1,(t-t0)/ms),e=p<.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;m3.k=from+(to-from)*e;
+  if(M3&&M3.getLayer('pot3d'))M3.setPaintProperty('pot3d','fill-extrusion-height',['*',['get','h'],m3.k]);if(p<1)m3._ga=requestAnimationFrame(f);else done&&done()};m3._ga=requestAnimationFrame(f)}
+function m3Regrow(){m3Ui();m3Anim(m3.k,0.04,450,()=>{upd3d();m3Anim(0.04,1,1100)})}
+function m3Card(i){const f=m3._g&&m3._g.pot.features[i];const c=$('#m3card');if(!f||!c)return;const p=f.properties,lbl=M3MET.find(x=>x[0]===m3.metric)[1];
+  c.style.display='block';c.innerHTML=`<div class="row" style="justify-content:space-between"><div class="t3" style="margin:0">${esc(p.id)}</div><button class="b3" id="m3cx">✕</button></div>
+  <div class="sub3">${esc(p.mod||'Sin módulo')}</div><div class="k3"><div><b>${fmt(p.cab)}</b><span>cabezas</span></div><div><b>${fmt(p.ha,1)}</b><span>ha</span></div><div><b style="color:${M3SEM[p.sem]}">●</b><span>${esc(p.semL)}</span></div></div>
+  <div class="sub3">${esc(lbl)}: <b>${m3.metric==='sem'?esc(p.semL):fmt(p.v,m3.metric==='carga'?2:0)}</b>${p.past?' · '+esc(p.past):''}</div>
+  <div class="row3"><button class="b3 on" id="m3open">Abrir ficha en el mapa</button></div>`;
+  $('#m3cx').onclick=()=>{m3Sel(null)};$('#m3open').onclick=()=>selectPot(p.id)}
+function m3Sel(i){if(!M3)return;if(m3.sel!=null)M3.setFeatureState({source:'pot',id:m3.sel},{sel:false});m3.sel=i;
+  if(i==null){const c=$('#m3card');if(c)c.style.display='none';return}M3.setFeatureState({source:'pot',id:i},{sel:true});m3Card(i);
+  const f=m3._g.pot.features[i],cs=f.geometry.coordinates[0],cx=cs.reduce((s,p)=>s+p[0],0)/cs.length,cy=cs.reduce((s,p)=>s+p[1],0)/cs.length;m3.spin=false;m3Ui();
+  M3.flyTo({center:[cx,cy],zoom:14.2,pitch:62,bearing:M3.getBearing()+25,duration:1600,essential:true})}
+async function render3d(force){if(!$('#ctl3d').innerHTML||force)m3Ui();
+  try{await loadML()}catch(e){$('#map3d').innerHTML='<div class="empty" style="color:#cfd8d0;padding-top:120px">No se pudo cargar el motor 3D (sin internet).</div>';return}
+  if(M3){M3.resize();upd3d();m3Ui();return}
   const b=L.latLngBounds(Object.values(BASE).flatMap(x=>x.ll));
-  M3=new maplibregl.Map({container:'map3d',style:{version:8,sources:{sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:17,attribution:'Imagen © Esri'}},layers:[{id:'sat',type:'raster',source:'sat'}]},
-    center:[b.getCenter().lng,b.getCenter().lat],zoom:12.3,pitch:58,bearing:-25,maxPitch:80,attributionControl:{compact:true}});
-  M3.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'top-right');
-  M3.on('load',()=>{const g=geo3d();M3.addSource('pot',{type:'geojson',data:g.pot});M3.addSource('lin',{type:'geojson',data:g.lin});M3.addSource('edif',{type:'geojson',data:g.edif});
-    M3.addLayer({id:'pot3d',type:'fill-extrusion',source:'pot',paint:{'fill-extrusion-color':['get','col'],'fill-extrusion-height':['get','h'],'fill-extrusion-opacity':.82}});
-    M3.addLayer({id:'lin',type:'line',source:'lin',paint:{'line-color':['get','col'],'line-width':['get','w']}});
-    M3.addLayer({id:'edif',type:'fill-extrusion',source:'edif',paint:{'fill-extrusion-color':['get','col'],'fill-extrusion-height':['get','h'],'fill-extrusion-opacity':.9}});
-    M3.on('click','pot3d',e=>{const p=e.features[0].properties;new maplibregl.Popup().setLngLat(e.lngLat).setHTML(`<b>${esc(p.id)}</b>${p.mod?'<br>'+esc(p.mod):''}<br>${fmt(p.ha,1)} ha · ${fmt(p.cab)} cab<br>${esc(p.sem)}<br><a href="#" onclick="selectPot('${String(p.id).replace(/'/g,"\\'")}');return false">Abrir ficha</a>`).addTo(M3)});
-    M3.on('mouseenter','pot3d',()=>M3.getCanvas().style.cursor='pointer');M3.on('mouseleave','pot3d',()=>M3.getCanvas().style.cursor='')})}
-function upd3d(){if(!M3||!M3.getSource||!M3.getSource('pot'))return;const g=geo3d();M3.getSource('pot').setData(g.pot);M3.getSource('lin').setData(g.lin);M3.getSource('edif').setData(g.edif)}
+  M3=new maplibregl.Map({container:'map3d',style:{version:8,sources:{sat:{type:'raster',tiles:['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],tileSize:256,maxzoom:17,attribution:'Imagen © Esri'}},
+    layers:[{id:'bg',type:'background',paint:{'background-color':'#0d1310'}},{id:'sat',type:'raster',source:'sat',layout:{visibility:'none'},paint:{'raster-fade-duration':400}}]},
+    center:[b.getCenter().lng,b.getCenter().lat],zoom:10.6,pitch:0,bearing:0,maxPitch:80,antialias:true,attributionControl:{compact:true}});
+  M3.addControl(new maplibregl.NavigationControl({visualizePitch:true}),'bottom-right');
+  const stop=()=>{m3.touched=performance.now()};['mousedown','touchstart','wheel','dragstart'].forEach(ev=>M3.on(ev,stop));
+  M3.on('load',()=>{const g=m3._g=geo3d();
+    M3.setLight({anchor:'map',color:'#ffffff',intensity:.42,position:[1.4,210,35]});
+    M3.addSource('pot',{type:'geojson',data:g.pot});M3.addSource('lin',{type:'geojson',data:g.lin});M3.addSource('edif',{type:'geojson',data:g.edif});M3.addSource('pts',{type:'geojson',data:g.pts});
+    M3.addLayer({id:'ground',type:'line',source:'pot',paint:{'line-color':'#e8efe9','line-opacity':.16,'line-width':.7}});
+    M3.addLayer({id:'lin',type:'line',source:'lin',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':['get','col'],'line-width':['get','w'],'line-opacity':.85}});
+    M3.addLayer({id:'pot3d',type:'fill-extrusion',source:'pot',paint:{'fill-extrusion-color':['case',['boolean',['feature-state','sel'],false],'#ffffff',['boolean',['feature-state','hov'],false],['get','colH'],['get','col']],
+      'fill-extrusion-height':['*',['get','h'],0],'fill-extrusion-base':0,'fill-extrusion-opacity':.9,'fill-extrusion-vertical-gradient':true}});
+    M3.addLayer({id:'crit',type:'line',source:'pot',filter:['==',['get','sem'],'rojo'],paint:{'line-color':'#ff6b62','line-width':2,'line-opacity':.6,'line-blur':1}});
+    M3.addLayer({id:'edif',type:'fill-extrusion',source:'edif',paint:{'fill-extrusion-color':['get','col'],'fill-extrusion-height':['get','h'],'fill-extrusion-opacity':.95}});
+    M3.addLayer({id:'pts',type:'circle',source:'pts',minzoom:13,paint:{'circle-radius':4,'circle-color':['get','col'],'circle-stroke-color':'#0d1310','circle-stroke-width':1.5}});
+    m3Base();
+    M3.on('mousemove','pot3d',e=>{const f=e.features[0];if(m3.hov!==f.id){if(m3.hov!=null)M3.setFeatureState({source:'pot',id:m3.hov},{hov:false});m3.hov=f.id;M3.setFeatureState({source:'pot',id:f.id},{hov:true})}
+      M3.getCanvas().style.cursor='pointer';const t=$('#m3tip');if(t){const p=f.properties;t.style.display='block';t.style.left=(e.point.x+14)+'px';t.style.top=(e.point.y+10)+'px';t.innerHTML=`<b>${esc(p.id)}</b> · ${fmt(p.cab)} cab<br><span style="color:${M3SEM[p.sem]}">●</span> ${esc(p.semL)}`}});
+    M3.on('mouseleave','pot3d',()=>{if(m3.hov!=null)M3.setFeatureState({source:'pot',id:m3.hov},{hov:false});m3.hov=null;M3.getCanvas().style.cursor='';const t=$('#m3tip');if(t)t.style.display='none'});
+    M3.on('click','pot3d',e=>m3Sel(e.features[0].id));
+    M3.on('click',e=>{if(!M3.queryRenderedFeatures(e.point,{layers:['pot3d']}).length)m3Sel(null)});
+    m3Home(3200);setTimeout(()=>m3Anim(0,1,1800),500);
+    const loop=t=>{m3.raf=requestAnimationFrame(loop);if(S.view!=='3d')return;
+      if(M3.getLayer('crit')){const s=(Math.sin(t/420)+1)/2;M3.setPaintProperty('crit','line-opacity',.25+.7*s);M3.setPaintProperty('crit','line-width',1.5+3*s)}
+      if(m3.spin&&!M3.isMoving()&&performance.now()-m3.touched>4000)M3.setBearing(M3.getBearing()+.035)};m3.raf=requestAnimationFrame(loop)})}
+function upd3d(){if(!M3||!M3.getSource||!M3.getSource('pot'))return;const g=m3._g=geo3d();M3.getSource('pot').setData(g.pot);M3.getSource('lin').setData(g.lin);M3.getSource('edif').setData(g.edif);M3.getSource('pts').setData(g.pts)}
+
 // ================= recorridos (tipo Strava) =================
 const TRK_MOT=['Recorrida de potreros','Control de aguadas','Control de alambrados','Arreo / rotación','Revisión de hacienda','Mantenimiento','Otro'];
 function trkStart(){G.trk={t0:Date.now(),pts:[],dist:0,mov:0,vmax:0,pausa:false,pausaT:0};G.follow=true;wakeOn();if(G.pos)trkPoint(G.pos.lat,G.pos.lon,G.pos.x,G.pos.y,Date.now(),G.pos.ac);
