@@ -928,7 +928,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;height:100%;font-family:Inter,system-ui,sans-serif;color:var(--ink);background:var(--bg);font-size:14px}body{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
 button,input,select,textarea{font:inherit}
 header{background:linear-gradient(90deg,#123d23,#1f6b3a);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-header h1{font-size:17px;margin:0;font-weight:700}header .sub{font-size:12px;opacity:.75}
+header h1{font-size:17px;margin:0;font-weight:700}header .firma{font-size:10px;opacity:.8;font-style:italic;letter-spacing:.2px}header .sub{font-size:12px;opacity:.75}
 .kpis{display:flex;gap:8px;flex-wrap:wrap;margin-left:auto}
 .kpi{background:rgba(255,255,255,.1);border-radius:8px;padding:5px 10px;text-align:center;min-width:72px}.kpi b{display:block;font-size:15px}.kpi span{font-size:10.5px;opacity:.8;text-transform:uppercase;letter-spacing:.4px}
 .kpi.s b{display:flex;gap:6px;justify-content:center;font-size:14px}
@@ -1024,7 +1024,7 @@ input,select,textarea{font-size:16px}.btn{padding:9px 12px}.btn.sm{padding:7px 1
 </head>
 <body>
 <header>
-  <div><h1>Estancia Queenie · Gestión integral</h1><div class="sub">Fuerte Olimpo – Alto Paraguay · <span id="hdrHa"></span></div></div>
+  <div><h1>Estancia Queenie · Gestión integral</h1><div class="sub">Fuerte Olimpo – Alto Paraguay · <span id="hdrHa"></span></div><div class="firma">Desarrollado por Dr. Ronald Robertti · CLARIDAE</div></div>
   <div class="kpis" id="kpis"></div>
 </header>
 <nav>
@@ -2003,16 +2003,23 @@ async function supaLoad(){try{const all=[];for(let f=0;;f+=1000){const r=await S
 function loginBox(){let el=$('#login');if(!el){el=document.createElement('div');el.id='login';document.body.appendChild(el)}return el}
 function showLogin(msg){const el=loginBox();el.style.display='flex';
   el.innerHTML=`<div class="lbox"><h2>🐂 Estancia Queenie</h2><p class="muted small">Ingresá con tu usuario. Si es la primera vez, creá tu cuenta y el administrador te asigna el rol.</p>${msg?`<div class="warn">${msg}</div>`:''}
-  <label class="f">Correo<input id="lgE" type="email" autocomplete="username"></label><label class="f" style="margin-top:8px">Contraseña<input id="lgP" type="password" autocomplete="current-password"></label>
+  <div id="lgErr" class="warn" style="display:none"></div><label class="f">Correo<input id="lgE" type="email" autocomplete="username"></label><label class="f" style="margin-top:8px">Contraseña<input id="lgP" type="password" autocomplete="current-password"></label>
   <label class="f" style="margin-top:8px;display:none" id="lgNw">Tu nombre<input id="lgN"></label>
   <div class="row" style="margin-top:14px"><button class="btn p grow" id="lgIn">Ingresar</button></div>
-  <div class="row small" style="margin-top:10px;justify-content:space-between"><a href="#" id="lgUp">Crear cuenta</a><a href="#" id="lgFg">Olvidé la contraseña</a></div></div>`;
+  <div class="row small" style="margin-top:10px;justify-content:space-between"><a href="#" id="lgUp">Crear cuenta</a><a href="#" id="lgFg">Olvidé la contraseña</a></div><p class="small muted" style="margin:14px 0 0;text-align:center;font-style:italic">Desarrollado por Dr. Ronald Robertti · CLARIDAE</p></div>`;
   let mode='in';
   $('#lgUp').onclick=e=>{e.preventDefault();mode=mode==='in'?'up':'in';$('#lgNw').style.display=mode==='up'?'flex':'none';$('#lgIn').textContent=mode==='up'?'Crear cuenta':'Ingresar';$('#lgUp').textContent=mode==='up'?'Ya tengo cuenta':'Crear cuenta'};
   $('#lgFg').onclick=async e=>{e.preventDefault();const em=$('#lgE').value.trim();if(!em){toast('Escribí tu correo');return}const r=await SB.auth.resetPasswordForEmail(em,{redirectTo:location.href.split('#')[0]});toast(r.error?r.error.message:'Te mandamos un correo para cambiar la contraseña')};
-  $('#lgIn').onclick=async()=>{const em=$('#lgE').value.trim(),pw=$('#lgP').value;if(!em||pw.length<6){toast('Correo y contraseña (mínimo 6)');return}$('#lgIn').disabled=true;
-    try{if(mode==='up'){const r=await SB.auth.signUp({email:em,password:pw,options:{data:{nombre:$('#lgN').value.trim()||em.split('@')[0]},emailRedirectTo:location.href.split('#')[0]}});if(r.error)throw r.error;if(!r.data.session){showLogin('Cuenta creada. Revisá tu correo y confirmá, después ingresá.');return}await afterLogin(r.data.session)}
-      else{const r=await SB.auth.signInWithPassword({email:em,password:pw});if(r.error)throw r.error;await afterLogin(r.data.session)}}catch(e){toast(/Invalid login/i.test(e.message)?'Correo o contraseña incorrectos':/confirm/i.test(e.message)?'Confirmá tu correo primero':e.message);$('#lgIn').disabled=false}}}
+  const lgErr=m=>{const e=$('#lgErr');e.style.display=m?'block':'none';e.innerHTML=m||''};
+  const TYPO={'gamil.com':'gmail.com','gmial.com':'gmail.com','gmail.co':'gmail.com','gmal.com':'gmail.com','gnail.com':'gmail.com','hotmial.com':'hotmail.com','hotmal.com':'hotmail.com','yaho.com':'yahoo.com','outlok.com':'outlook.com'};
+  $('#lgIn').onclick=async()=>{let em=$('#lgE').value.trim().toLowerCase(),pw=$('#lgP').value;lgErr('');
+    const dom=em.split('@')[1];if(dom&&TYPO[dom]){em=em.replace(/@.*/,'@'+TYPO[dom]);$('#lgE').value=em;lgErr(`Corregí el correo a <b>${esc(em)}</b> (decía “${esc(dom)}”). Revisá y tocá de nuevo.`);return}
+    if(!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/.test(em)){lgErr('Escribí un correo válido, por ejemplo nombre@gmail.com');return}
+    if(pw.length<6){lgErr('La contraseña tiene que tener al menos 6 caracteres');return}$('#lgIn').disabled=true;$('#lgIn').textContent='Un momento…';
+    try{if(mode==='up'){const r=await SB.auth.signUp({email:em,password:pw,options:{data:{nombre:$('#lgN').value.trim()||em.split('@')[0]},emailRedirectTo:location.href.split('#')[0]}});if(r.error)throw r.error;if(!r.data.session){showLogin(`✅ Cuenta creada. Te mandamos un correo a <b>${esc(em)}</b>: abrilo (mirá también en Spam), tocá el enlace de confirmación y después ingresá acá.`);return}await afterLogin(r.data.session)}
+      else{const r=await SB.auth.signInWithPassword({email:em,password:pw});if(r.error)throw r.error;await afterLogin(r.data.session)}}catch(e){const m=e.message||String(e);
+      lgErr(/Invalid login/i.test(m)?'Correo o contraseña incorrectos. Si todavía no tenés cuenta, tocá <b>Crear cuenta</b>.':/not confirmed|confirm/i.test(m)?'Falta confirmar el correo: abrí el mensaje de Supabase en tu bandeja (o en Spam), tocá el enlace y después ingresá acá.':/rate limit|429/i.test(m)?'Se mandaron demasiados correos de confirmación seguidos. Esperá una hora y probá de nuevo (es un límite del servidor de correo).':/invalid/i.test(m)&&/email/i.test(m)?'Ese correo no es válido. Revisá cómo está escrito.':/already|registered/i.test(m)?'Ese correo ya tiene cuenta: tocá <b>Ya tengo cuenta</b> e ingresá.':/fetch|network/i.test(m)?'Sin conexión a internet.':esc(m));
+      $('#lgIn').disabled=false;$('#lgIn').textContent=mode==='up'?'Crear cuenta':'Ingresar'}}}
 function hideLogin(){const el=$('#login');if(el)el.style.display='none'}
 function showPending(){const el=loginBox();el.style.display='flex';el.innerHTML=`<div class="lbox"><h2>⏳ Esperando aprobación</h2><p>Hola <b>${esc(S.me.nombre||S.me.email)}</b>. Tu cuenta está creada; el administrador tiene que asignarte un rol (Encargado o Personal de campo).</p><div class="row"><button class="btn" id="pdR">Volver a intentar</button><button class="btn" id="pdO">Salir</button></div></div>`;
   $('#pdR').onclick=async()=>{const{data:{session}}=await SB.auth.getSession();if(session)afterLogin(session)};$('#pdO').onclick=()=>SB.auth.signOut()}
