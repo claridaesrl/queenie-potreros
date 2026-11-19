@@ -1064,7 +1064,7 @@ input,select,textarea{font-size:16px}.btn{padding:9px 12px}.btn.sm{padding:7px 1
   <button data-v="3d">🧊 3D</button>
   <button data-v="agro">🌾 Agricultura y trabajos</button>
   <button data-v="cfg">⚙️ Parámetros</button>
-  <button data-v="personal" class="rol-enc" style="display:none">🧑‍🌾 Personal</button>
+  <button data-v="personal" style="display:none">🧑‍🌾 Personal</button>
   <button data-v="usr" style="display:none">👥 Usuarios</button>
   <button data-v="sys" class="rol-dev">🛡️ Sistema</button>
   <span id="sync">Conectando…</span>
@@ -2062,13 +2062,14 @@ const NAVL={mapa:['🗺️ Mapa','🗺️ Mapa'],potreros:['📋 Potreros y corr
 function navLabels(){const m=MOB()?1:0;document.querySelectorAll('nav button[data-v]').forEach(b=>{const l=NAVL[b.dataset.v];if(l)b.textContent=l[m]})}
 addEventListener('resize',()=>{clearTimeout(window._rz);window._rz=setTimeout(()=>{navLabels();if(map){renderMap();renderLabels()}},300)});setTimeout(navLabels,0);
 function applyRoleUI(){document.body.dataset.rol=S.rol||'dev';const b=document.querySelector('nav button[data-v="cfg"]');if(b)b.style.display=can('*')?'':'none';
-  const pb=document.querySelector('nav button[data-v="personal"]');if(pb)pb.style.display=(Store.mode==='supa'&&can('lote'))?'':'none';const ub=document.querySelector('nav button[data-v="usr"]');if(ub)ub.style.display=(Store.mode==='supa'&&can('*'))?'':'none';const ab=$('#addBtn');if(ab)ab.style.display=can('*')?'':'none';renderView(true)}
+  const pb=document.querySelector('nav button[data-v="personal"]');if(pb)pb.style.display=canSeeStaff()?'':'none';const ub=document.querySelector('nav button[data-v="usr"]');if(ub)ub.style.display=(Store.mode==='supa'&&can('*'))?'':'none';const ab=$('#addBtn');if(ab)ab.style.display=can('*')?'':'none';renderView(true)}
 async function renderUsers(){const box=$('#usrBox');if(!SB){box.innerHTML='<div class="empty">Disponible con la base compartida (Supabase).</div>';return}
   const r=await SB.from('profiles').select('*').order('created_at');const us=r.data||[];
-  box.innerHTML=`<div class="card"><h2>👥 Usuarios y roles</h2><p class="small muted">Cada persona entra al link, toca “Crear cuenta” con su correo y acá le asignás el rol. <b>Desarrollador</b>: todo. <b>Encargado</b>: hacienda, pesajes, rotaciones, bajas, evaluaciones, trabajos, fotos y recorridos. <b>Personal de campo</b>: ver el mapa y GPS, rotaciones/traslados, mortandad y transferencias con foto, fotos y recorridos.</p>
-  <div class="tbl" style="max-height:none"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Alta</th></tr></thead><tbody>${us.map(u=>`<tr><td><b>${esc(u.nombre||'')}</b></td><td>${esc(u.email||'')}</td><td>${u.id===S.me.id?esc(ROLN[u.rol]):`<select data-u="${u.id}">${Object.entries(ROLN).map(([k,v])=>`<option value="${k}" ${u.rol===k?'selected':''}>${v}</option>`).join('')}</select>`}</td><td>${dFmt((u.created_at||'').slice(0,10))}</td></tr>`).join('')}</tbody></table></div>
+  box.innerHTML=`<div class="card"><h2>👥 Usuarios y roles</h2><p class="small muted">Cada persona entra al link, toca “Crear cuenta” con su correo y acá le asignás el rol. <b>Desarrollador</b>: todo. <b>Encargado</b>: hacienda, pesajes, rotaciones, bajas, evaluaciones, trabajos, fotos y recorridos. <b>Personal de campo</b>: ver el mapa y GPS, rotaciones/traslados, mortandad y transferencias con foto, fotos y recorridos.<br>🧑‍🌾 <b>Ver al personal en vivo</b>: solo vos; podés habilitarlo a los encargados que elijas con la casilla.</p>
+  <div class="tbl" style="max-height:none"><table><thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Ve al personal</th><th>Alta</th></tr></thead><tbody>${us.map(u=>`<tr><td><b>${esc(u.nombre||'')}</b></td><td>${esc(u.email||'')}</td><td>${u.id===S.me.id?esc(ROLN[u.rol]):`<select data-u="${u.id}">${Object.entries(ROLN).map(([k,v])=>`<option value="${k}" ${u.rol===k?'selected':''}>${v}</option>`).join('')}</select>`}</td><td>${u.rol==='dev'?'✔ siempre':u.rol==='encargado'?`<label><input type="checkbox" data-vp="${u.id}" ${u.ver_personal?'checked':''}> Sí</label>`:'–'}</td><td>${dFmt((u.created_at||'').slice(0,10))}</td></tr>`).join('')}</tbody></table></div>
   <div class="row" style="margin-top:10px"><span class="grow small muted">Conectado como ${esc(S.me.email)}</span><button class="btn" id="usOut">Cerrar sesión</button></div></div>`;
   box.querySelectorAll('[data-u]').forEach(sel=>sel.onchange=async()=>{const r=await SB.from('profiles').update({rol:sel.value}).eq('id',sel.dataset.u);toast(r.error?'Error: '+r.error.message:'Rol actualizado')});
+  box.querySelectorAll('[data-vp]').forEach(c=>c.onchange=async()=>{const r=await SB.from('profiles').update({ver_personal:c.checked}).eq('id',c.dataset.vp);toast(r.error?'Error: '+r.error.message:(c.checked?'Ahora puede ver al personal en vivo':'Ya no puede ver al personal'))});
   $('#usOut').onclick=()=>SB.auth.signOut()}
 function handleErr(e){toast(e&&e.code==='invalid_argument'?'No tenés permiso para editar':e&&e.code==='quota_exceeded'?'Base de datos llena':'Error al guardar: '+(e&&e.message||e))}
 function setSync(t){$('#sync').textContent=t}
@@ -3429,7 +3430,7 @@ async function sysPanel(){const box=$('#sysBox');if(!box)return;let u=null;if(St
 
 // ================= personal en vivo y reportes =================
 const ST={u:{},q:[],lastSend:0,lastHist:0,lastPt:null,ly:null,trail:null,sel:null};
-const canSeeStaff=()=>Store.mode==='supa'&&['dev','encargado'].includes(S.rol);
+const canSeeStaff=()=>Store.mode==='supa'&&(S.rol==='dev'||(S.rol==='encargado'&&!!(S.me&&S.me.ver_personal)));
 let EQEBOX=null;
 function inEQE(x,y,hit){if(hit)return true;if(!EQEBOX){let a=1e12,b=1e12,c=-1e12,d=-1e12;UL.forEach(u=>u.c.forEach(([px,py])=>{a=Math.min(a,px);b=Math.min(b,py);c=Math.max(c,px);d=Math.max(d,py)}));EQEBOX=[a-300,b-300,c+300,d+300]}
   if(x<EQEBOX[0]||x>EQEBOX[2]||y<EQEBOX[1]||y>EQEBOX[3])return false;
@@ -3458,7 +3459,7 @@ function renderStaff(){if(!map||!canSeeStaff())return;if(!ST.ly)ST.ly=L.layerGro
     mk.on('click',()=>{showView('personal');verPersonal(u.user_id,todayS())});mk.addTo(ST.ly)})}
 // ---- vista Personal ----
 let PD=todayS();
-async function renderPersonal(){const box=$('#perBox');if(!canSeeStaff()){box.innerHTML='<div class="empty">Disponible para el desarrollador y los encargados, con la base compartida.</div>';return}
+async function renderPersonal(){const box=$('#perBox');if(!canSeeStaff()){box.innerHTML='<div class="empty">Solo el desarrollador y los encargados autorizados pueden ver al personal.</div>';return}
   const r=await SB.from('profiles').select('id,nombre,email,rol').neq('rol','pendiente');const us=r.data||[];
   const d0=new Date(PD+'T00:00:00'),d1=new Date(d0.getTime()+864e5);
   const h=await SB.from('ubic_hist').select('user_id,lat,lon,pot,at,spd').gte('at',d0.toISOString()).lt('at',d1.toISOString()).order('at').limit(20000);const pts=h.data||[];
