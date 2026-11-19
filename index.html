@@ -2334,7 +2334,7 @@ function fieldInput(c,v,id){const nm=esc(c.n);
 function readFields(root,campos){const o={};root.querySelectorAll('[data-fld]').forEach(i=>{const c=campos.find(x=>x.n===i.dataset.fld);if(!c)return;o[c.n]=c.t===NUM?(i.value===''?null:+i.value):i.value});return o}
 function geoTools(){return `<div class="geo"><div class="small" style="margin-bottom:6px"><b>✏️ Forma y posición</b></div>
   ${GE.layer?`<div class="info">${GE.mode==='drag'?'Arrastrá la figura a su nueva posición.':GE.mode==='rot'?'Arrastrá los puntos de las esquinas para girar.':'Arrastrá los vértices; tocá un vértice para borrarlo, o el punto medio de un lado para agregar uno.'}</div><div class="row"><button class="btn p sm" id="geoOk">✔ Guardar forma</button><button class="btn sm" id="geoNo">Cancelar</button></div>`
-  :`<div class="row"><button class="btn sm" data-geo="drag">✋ Mover</button>${GE_canRot()?'<button class="btn sm" data-geo="rot">🔄 Rotar</button><button class="btn sm" data-geo="vert">📐 Editar vértices</button><button class="btn sm" data-geo="dim">📏 Medidas exactas</button>':''}</div>`}</div>`}
+  :`<div class="row"><button class="btn sm" data-geo="drag">✋ Mover</button>${GE_canRot()?'<button class="btn sm" data-geo="rot">🔄 Rotar</button><button class="btn sm" data-geo="vert">📐 Editar vértices</button>':''}<button class="btn sm p" data-geo="dim">📏 ${GE_canRot()?'Medidas exactas':'Ubicación exacta'}</button></div>`}</div>`}
 function GE_canRot(){if(S.sel)return true;const e=S.el[S.selE];return e&&e.g&&e.g.t!=='pt'}
 function bindGeo(){const el=$('#side');el.querySelectorAll('[data-geo]').forEach(b=>b.onclick=()=>startGeo(b.dataset.geo));
   if($('#geoOk'))$('#geoOk').onclick=()=>endGeo(true);if($('#geoNo'))$('#geoNo').onclick=()=>endGeo(false)}
@@ -2567,7 +2567,7 @@ function modCard(mid){const mc=modCalcCache[mid],m=mc.m;const g=gmdModel({cat:''
   <div class="row small" style="margin:6px 0">${mc.pots.map(p=>`<a href="#" data-gp="${esc(p)}">${esc(p)}</a>`).join(' · ')}</div>
   ${mc.ls.length?mc.ls.map(loteItem).join(''):'<div class="muted small">Sin animales cargados en el módulo.</div>'}
   ${fotoHtml('modulos/'+mid,'Fotos del módulo')}
-  <div class="geo rol-dev" style="margin:8px 0"><b class="small">▭ Contorno del módulo</b>${MGE&&MGE.mid===mid?`<div class="info">Arrastrá los puntos blancos; tocá un punto para borrarlo o el punto medio de un lado para agregar uno.</div><div class="row"><button class="btn p sm" data-mgok>✔ Guardar contorno</button><button class="btn sm" data-mgno>Cancelar</button></div>`:`<div class="row" style="margin-top:6px"><button class="btn sm" data-mge>✏️ Editar contorno</button>${m.geom?'<button class="btn sm" data-mgauto>↺ Volver a automático</button>':''}</div><p class="small muted" style="margin:4px 0 0">${m.geom?'Contorno dibujado a mano.':'Automático: sigue el borde de sus potreros.'}</p>`}</div>
+  <div class="geo rol-dev" style="margin:8px 0"><b class="small">▭ Contorno del módulo</b>${MGE&&MGE.mid===mid?`<div class="info">Arrastrá los puntos blancos; tocá un punto para borrarlo o el punto medio de un lado para agregar uno.</div><div class="row"><button class="btn p sm" data-mgok>✔ Guardar contorno</button><button class="btn sm" data-mgno>Cancelar</button></div>`:`<div class="row" style="margin-top:6px"><button class="btn sm" data-mge>✏️ Editar contorno</button><button class="btn sm" data-mgdim>📏 Medidas</button>${m.geom?'<button class="btn sm" data-mgauto>↺ Volver a automático</button>':''}</div><p class="small muted" style="margin:4px 0 0">${m.geom?'Contorno dibujado a mano.':'Automático: sigue el borde de sus potreros.'}</p>`}</div>
   <div class="row"><button class="btn p sm rol-enc" data-addml>+ Lote en el módulo</button><button class="btn sm rol-dev" data-edm>Editar módulo</button><button class="btn sm" data-seem>Ver módulo</button></div></div>`}
 function bindModCard(mid){const el=$('#side');const m=MOD[mid];
   el.querySelectorAll('[data-ms]').forEach(b=>b.onclick=async()=>{try{await saveMod(mid,{semMan:b.dataset.ms});toast('Semáforo del módulo: '+(b.dataset.ms?SEML[b.dataset.ms]:'automático'))}catch(e){}});
@@ -2578,7 +2578,7 @@ function bindModCard(mid){const el=$('#side');const m=MOD[mid];
   const ad=el.querySelector('[data-addml]');if(ad)ad.onclick=()=>loteForm(null,{mod:mid});
   const ed=el.querySelector('[data-edm]');if(ed)ed.onclick=()=>modForm(mid);
   const se=el.querySelector('[data-seem]');if(se)se.onclick=()=>selectMod(mid);
-  const q=x=>el.querySelector(x);if(q('[data-mge]'))q('[data-mge]').onclick=()=>modGeoStart(mid);if(q('[data-mgok]'))q('[data-mgok]').onclick=()=>modGeoEnd(true);if(q('[data-mgno]'))q('[data-mgno]').onclick=()=>modGeoEnd(false);if(q('[data-mgauto]'))q('[data-mgauto]').onclick=async()=>{try{await saveMod(mid,{geom:null});delete MSC[mid];toast('Contorno automático')}catch(e){}};
+  const q=x=>el.querySelector(x);if(q('[data-mgdim]'))q('[data-mgdim]').onclick=()=>{const r=modShape(mid)[0];if(!r){toast('El módulo no tiene potreros');return}dimFor(r,'pol',async loc=>{const ll=loc.map(([x,y])=>loc2ll(x,y));ll.push(ll[0]);try{await saveMod(mid,{geom:ll});delete MSC[mid];toast('Medidas del módulo aplicadas')}catch(e){}})};if(q('[data-mge]'))q('[data-mge]').onclick=()=>modGeoStart(mid);if(q('[data-mgok]'))q('[data-mgok]').onclick=()=>modGeoEnd(true);if(q('[data-mgno]'))q('[data-mgno]').onclick=()=>modGeoEnd(false);if(q('[data-mgauto]'))q('[data-mgauto]').onclick=async()=>{try{await saveMod(mid,{geom:null});delete MSC[mid];toast('Contorno automático')}catch(e){}};
   bindLotes(el)}
 function renderModSide(){const el=$('#side'),mid=S.selM;el.innerHTML=`<div class="row"><h2 class="grow" style="margin:0">Módulo</h2><button class="btn sm" id="xsel">✕</button></div>${modCard(mid)}`;$('#xsel').onclick=clearSel;bindModCard(mid)}
 function saveMod(mid,patch){const m=MOD[mid]||{};const{_k,...rest}=m;const doc={...rest,...patch,id:mid,upd:new Date().toISOString()};doc.pots=patch.pots||(S.mod[m._k]||{}).pots||m.pots||[];return Store.set('modulos',m._k||keyOf(mid),doc)}
@@ -3121,13 +3121,21 @@ function galeria(ref){const fs=fotosDe(ref);modal(`<h2>📷 Fotos (${fs.length})
 // ================= medidas exactas =================
 function dimForm(){const isU=!!S.sel,id=S.sel||S.selE;let ll,t;
   if(isU){ll=POT[id].ll.slice();t='pol'}else{const e=S.el[id];ll=e.g.c.slice();t=e.g.t}
+  dimFor(ll,t,loc=>saveDim(isU,id,loc))}
+function dimFor(ll,t,save){ll=ll.slice();
+  if(t==='pt'){const[x,y]=ll2utm(ll[0][0],ll[0][1]);
+    modal(`<h2>📏 Ubicación exacta</h2><p class="small muted">UTM 21S: E ${fmt(x+E0)} · N ${fmt(y+N0)}</p>
+    <div class="row"><label class="f">Latitud<input id="dmLa" type="number" step="any" value="${ll[0][0]}"></label><label class="f">Longitud<input id="dmLo" type="number" step="any" value="${ll[0][1]}"></label></div>
+    <h3>O correrlo unos metros</h3><div class="row"><label class="f">Metros al Este (− = Oeste)<input id="dmE" type="number" step="any" value="0"></label><label class="f">Metros al Norte (− = Sur)<input id="dmN" type="number" step="any" value="0"></label></div>
+    <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn" id="dmX">Cancelar</button><button class="btn p" id="dmS">Aplicar</button></div>`,()=>{
+      $('#dmX').onclick=closeModal;$('#dmS').onclick=async()=>{const la=+$('#dmLa').value,lo=+$('#dmLo').value;if(!isFinite(la)||!isFinite(lo))return;let[px,py]=ll2utm(la,lo);px+=+$('#dmE').value||0;py+=+$('#dmN').value||0;closeModal();await save([[px,py]])}});return}
   if(t==='pol'&&ll.length>1&&ll[0][0]===ll[ll.length-1][0]&&ll[0][1]===ll[ll.length-1][1])ll.pop();
   const c=llToLoc(ll);
   if(t==='line'){const len=lineLen(c);
     modal(`<h2>📏 Medidas exactas</h2><p class="small muted">Largo actual: <b>${fmt(len)} m</b>. Escribí el largo que querés; se estira o acorta desde el primer punto manteniendo la dirección.</p>
     <label class="f">Largo (m)<input id="dmL" type="number" step="any" value="${Math.round(len)}"></label>
     <div class="row" style="margin-top:12px;justify-content:flex-end"><button class="btn" id="dmX">Cancelar</button><button class="btn p" id="dmS">Aplicar</button></div>`,()=>{
-      $('#dmX').onclick=closeModal;$('#dmS').onclick=async()=>{const L2=+$('#dmL').value;if(!(L2>0))return;const k=L2/len,o=c[0];closeModal();await saveDim(isU,id,c.map(([x,y])=>[o[0]+(x-o[0])*k,o[1]+(y-o[1])*k]))}});return}
+      $('#dmX').onclick=closeModal;$('#dmS').onclick=async()=>{const L2=+$('#dmL').value;if(!(L2>0))return;const k=L2/len,o=c[0];closeModal();await save(c.map(([x,y])=>[o[0]+(x-o[0])*k,o[1]+(y-o[1])*k]))}});return}
   // polígono: rectángulo orientado por el lado más largo
   let best=0,ang=0;for(let i=0;i<c.length;i++){const a=c[i],b=c[(i+1)%c.length],d=Math.hypot(b[0]-a[0],b[1]-a[1]);if(d>best){best=d;ang=Math.atan2(b[0]-a[0],b[1]-a[1])}}
   const ux=Math.sin(ang),uy=Math.cos(ang),vx=uy,vy=-ux;const cx=c.reduce((s,p)=>s+p[0],0)/c.length,cy=c.reduce((s,p)=>s+p[1],0)/c.length;
@@ -3143,9 +3151,10 @@ function dimForm(){const isU=!!S.sel,id=S.sel||S.selE;let ll,t;
     const info=()=>{const L2=+$('#dmL').value,W=+$('#dmW').value;$('#dmI').textContent=L2>0&&W>0?`= ${fmt(L2*W/1e4,2)} ha · perímetro ${fmt(2*(L2+W))} m`:''};info();$('#dmL').oninput=info;$('#dmW').oninput=info;
     $('#dmX').onclick=closeModal;
     $('#dmR').onclick=async()=>{const L2=+$('#dmL').value,W=+$('#dmW').value,A=(+$('#dmA').value)*Math.PI/180;if(!(L2>0&&W>0))return;const px=Math.sin(A),py=Math.cos(A),qx=py,qy=-px;
-      const pts=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([i,j])=>[ccx+px*i*L2/2+qx*j*W/2,ccy+py*i*L2/2+qy*j*W/2]);closeModal();await saveDim(isU,id,pts)};
-    $('#dmE').onclick=async()=>{const H=+$('#dmH').value;if(!(H>0))return;const k=Math.sqrt(H/ha);closeModal();await saveDim(isU,id,c.map(([x,y])=>[cx+(x-cx)*k,cy+(y-cy)*k]))}})}
+      const pts=[[-1,-1],[1,-1],[1,1],[-1,1]].map(([i,j])=>[ccx+px*i*L2/2+qx*j*W/2,ccy+py*i*L2/2+qy*j*W/2]);closeModal();await save(pts)};
+    $('#dmE').onclick=async()=>{const H=+$('#dmH').value;if(!(H>0))return;const k=Math.sqrt(H/ha);closeModal();await save(c.map(([x,y])=>[cx+(x-cx)*k,cy+(y-cy)*k]))}})}
 async function saveDim(isU,id,loc){let ll=loc.map(([x,y])=>loc2ll(x,y));try{
+  if(!isU&&S.el[id].g.t==='pt'){const e=S.el[id];await Store.set('elems',id,{...e,g:{...e.g,c:ll},upd:new Date().toISOString()});toast('Ubicación aplicada');renderMap();renderSide(true);return}
   if(isU){ll.push(ll[0]);await savePot(id,{geom:ll,nuevo:!BASE[id]||!!potData(id).nuevo})}else{const e=S.el[id];if(e.g.t==='pol')ll.push(ll[0]);await Store.set('elems',id,{...e,g:{...e.g,c:ll},upd:new Date().toISOString()})}
   toast('Medidas aplicadas');renderMap();renderSide(true)}catch(e){}}
 // ================= producción y costos =================
